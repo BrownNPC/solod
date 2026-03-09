@@ -45,6 +45,11 @@ int main(void) {
             so_println("%s %" PRId64 " %s %d", "i =", i, "r =", r);
             i += _iw;
         }
+        for (so_int _i = 0; _i < so_len(str);) {
+            int _iw = 0;
+            so_utf8_decode(str, _i, &_iw);
+            _i += _iw;
+        }
     }
     {
         // Compare strings.

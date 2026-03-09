@@ -34,6 +34,8 @@ func main() {
 		for i, r := range "go" {
 			println("i =", i, "r =", r)
 		}
+		for range str {
+		}
 	}
 
 	{

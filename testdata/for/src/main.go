@@ -25,6 +25,9 @@ func main() {
 		println("range", k)
 	}
 
+	for range 3 {
+	}
+
 	for {
 		println("loop")
 		break

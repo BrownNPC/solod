@@ -187,5 +187,7 @@ func main() {
 		if sum != 6 {
 			panic("want sum == 6")
 		}
+		for range s {
+		}
 	}
 }

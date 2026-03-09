@@ -175,5 +175,7 @@ int main(void) {
         if (sum != 6) {
             so_panic("want sum == 6");
         }
+        for (so_int _i = 0; _i < so_len(s); _i++) {
+        }
     }
 }

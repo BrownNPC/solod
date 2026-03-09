@@ -22,6 +22,8 @@ int main(void) {
     for (so_int k = 0; k < 3; k++) {
         so_println("%s %" PRId64, "range", k);
     }
+    for (so_int _i = 0; _i < 3; _i++) {
+    }
     for (;;) {
         so_println("%s", "loop");
         break;
