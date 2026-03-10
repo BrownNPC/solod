@@ -220,9 +220,9 @@ A high-level standard library similar to Go's stdlib is also planned.
 
 ✅ Transpiler with basic Go features.
 
-⏳ Low-level stdlib (libc wrappers).
+✅ Low-level stdlib (libc wrappers). Done for now; I will add more if needed.
 
-⬜ Core stdlib packages: fmt, io, strings, time, ...
+⏳ Core stdlib packages: fmt, io, strings, time, ...
 
 ⬜ Hardened transpiler.
 
