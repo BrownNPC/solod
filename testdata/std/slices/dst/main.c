@@ -77,4 +77,32 @@ int main(void) {
             so_panic("want empty and nil slices equal");
         }
     }
+    {
+        // Equal string slices.
+        so_Slice s1 = (so_Slice){(so_String[3]){so_str("a"), so_str("b"), so_str("c")}, 3, 3};
+        so_Slice s2 = (so_Slice){(so_String[3]){so_str("a"), so_str("b"), so_str("c")}, 3, 3};
+        so_Slice s3 = (so_Slice){(so_String[3]){so_str("a"), so_str("b"), so_str("d")}, 3, 3};
+        if (!slices_Equal(so_String, s1, s2)) {
+            so_panic("want s1 == s2");
+        }
+        if (slices_Equal(so_String, s1, s3)) {
+            so_panic("want s1 != s3");
+        }
+    }
+    {
+        // Equal struct slices.
+        typedef struct point {
+            so_int x;
+            so_int y;
+        } point;
+        so_Slice s1 = (so_Slice){(point[2]){(point){1, 2}, (point){3, 4}}, 2, 2};
+        so_Slice s2 = (so_Slice){(point[2]){(point){1, 2}, (point){3, 4}}, 2, 2};
+        so_Slice s3 = (so_Slice){(point[2]){(point){1, 2}, (point){3, 5}}, 2, 2};
+        if (!slices_Equal(point, s1, s2)) {
+            so_panic("want s1 == s2");
+        }
+        if (slices_Equal(point, s1, s3)) {
+            so_panic("want s1 != s3");
+        }
+    }
 }

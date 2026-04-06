@@ -79,4 +79,31 @@ func main() {
 			panic("want empty and nil slices equal")
 		}
 	}
+	{
+		// Equal string slices.
+		s1 := []string{"a", "b", "c"}
+		s2 := []string{"a", "b", "c"}
+		s3 := []string{"a", "b", "d"}
+		if !slices.Equal(s1, s2) {
+			panic("want s1 == s2")
+		}
+		if slices.Equal(s1, s3) {
+			panic("want s1 != s3")
+		}
+	}
+	{
+		// Equal struct slices.
+		type point struct {
+			x, y int
+		}
+		s1 := []point{{1, 2}, {3, 4}}
+		s2 := []point{{1, 2}, {3, 4}}
+		s3 := []point{{1, 2}, {3, 5}}
+		if !slices.Equal(s1, s2) {
+			panic("want s1 == s2")
+		}
+		if slices.Equal(s1, s3) {
+			panic("want s1 != s3")
+		}
+	}
 }

@@ -2,19 +2,33 @@
 package slices
 
 import (
-	_ "embed"
+	"unsafe"
 
+	"solod.dev/so/c"
 	"solod.dev/so/mem"
 )
 
 //so:embed slices.h
 var slices_h string
 
+//so:extern so_Slice
+type sliceHeader struct {
+	ptr *byte
+	len uintptr
+	cap uintptr
+}
+
+//so:extern so_R_slice_err
+type sliceResult struct {
+	val sliceHeader
+	err error
+}
+
 // Make allocates a slice of type T with given length using allocator a.
 // If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 //
-//so:extern
+//so:inline
 func Make[T any](a mem.Allocator, len int) []T {
 	return mem.AllocSlice[T](a, len, len)
 }
@@ -23,7 +37,7 @@ func Make[T any](a mem.Allocator, len int) []T {
 // If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 //
-//so:extern
+//so:inline
 func MakeCap[T any](a mem.Allocator, len int, cap int) []T {
 	return mem.AllocSlice[T](a, len, cap)
 }
@@ -31,36 +45,22 @@ func MakeCap[T any](a mem.Allocator, len int, cap int) []T {
 // Free frees a previously allocated slice.
 // If the allocator is nil, uses the system allocator.
 //
-//so:extern
+//so:inline
 func Free[T any](a mem.Allocator, s []T) {
 	mem.FreeSlice(a, s)
-}
-
-// Append appends elements to a heap-allocated slice, growing it if needed.
-// If the allocator is nil, uses the system allocator.
-// Returns an updated allocated slice; the caller owns it.
-//
-//so:extern
-func Append[T any](a mem.Allocator, s []T, elems ...T) []T {
-	return append(s, elems...)
-}
-
-// Extend appends all elements from another heap-allocated slice, growing if needed.
-// If the allocator is nil, uses the system allocator.
-// Returns an updated allocated slice; the caller owns it.
-//
-//so:extern
-func Extend[T any](a mem.Allocator, s []T, other []T) []T {
-	return append(s, other...)
 }
 
 // Clone returns a shallow copy of the slice.
 // If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 //
-//so:extern
+//so:inline
 func Clone[T any](a mem.Allocator, s []T) []T {
-	return append([]T{}, s...)
+	_s, _slen := s, len(s)
+	_elemSize := c.Sizeof[T]()
+	_newSlice := mem.AllocSlice[T](a, _slen, _slen)
+	mem.Copy(unsafe.SliceData(_newSlice), unsafe.SliceData(_s), _slen*_elemSize)
+	return _newSlice
 }
 
 // Equal reports whether two slices are equal: the same length and all
