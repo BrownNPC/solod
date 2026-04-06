@@ -34,20 +34,7 @@ func Benchmark_IntGet(b *testing.B) {
 	}
 }
 
-func Benchmark_IntHas(b *testing.B) {
-	b.ReportAllocs()
-	m := make(map[int]int, nKeys)
-	for i := range nKeys {
-		m[i] = i
-	}
-	for b.Loop() {
-		for i := range nKeys {
-			_, sinkBool = m[i]
-		}
-	}
-}
-
-func Benchmark_IntDelete(b *testing.B) {
+func Benchmark_IntDel(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		m := make(map[int]int, nKeys)
@@ -83,20 +70,7 @@ func Benchmark_StrGet(b *testing.B) {
 	}
 }
 
-func Benchmark_StrHas(b *testing.B) {
-	b.ReportAllocs()
-	m := make(map[string]int, nKeys)
-	for i := range nKeys {
-		m[strKeys[i]] = i
-	}
-	for b.Loop() {
-		for i := range nKeys {
-			_, sinkBool = m[strKeys[i]]
-		}
-	}
-}
-
-func Benchmark_StrDelete(b *testing.B) {
+func Benchmark_StrDel(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		m := make(map[string]int, nKeys)

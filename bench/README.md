@@ -75,24 +75,22 @@ Apple M1 • Go 1.26.1 • [details](./strings/README.md#builder)
 
 So lookups are 3.4x faster than Go, while modifications are 1.6x slower.
 
-| Benchmark |      Go | So (mimalloc) | So (arena) | Winner        |
-| --------- | ------: | ------------: | ---------: | ------------- |
-| Set       | 35580ns |       56696ns |    57661ns | Go - 0.6x     |
-| Get       |  5573ns |        1638ns |     1583ns | **So** - 3.4x |
-| Has       |  5660ns |        1596ns |     1532ns | **So** - 3.5x |
-| Delete    | 23892ns |       38556ns |    38821ns | Go - 0.6x     |
+So's built-in map is faster than Go's, but I wouldn't call it the winner because it's only useful in certain situations — it's fixed size and stack-allocated.
+
+| Benchmark |      Go | So (mimalloc) | So (arena) | So (built-in) | Winner        |
+| --------- | ------: | ------------: | ---------: | ------------: | ------------- |
+| Set       | 35580ns |       56696ns |    57661ns |        3242ns | Go - 0.6x     |
+| Get       |  5573ns |        1638ns |     1583ns |        2733ns | **So** - 3.4x |
+| Delete    | 23892ns |       38556ns |    38821ns |           n/a | Go - 0.6x     |
 
 ### String keys
 
 So lookups are on par with Go, while modifications are 1.5x slower.
 
-So's built-in map is just as good as Go's for lookups and modifications, but I wouldn't call it the winner because it's only useful in certain situations — it's fixed size and stack-allocated.
-
 | Benchmark |      Go | So (mimalloc) | So (arena) | So (built-in) | Winner    |
 | --------- | ------: | ------------: | ---------: | ------------: | --------- |
-| Set       | 48677ns |       71879ns |    63500ns |        6354ns | Go - 0.7x |
-| Get       |  8990ns |       10206ns |    10083ns |       10848ns | Go - 0.9x |
-| Has       | 10174ns |       10135ns |    10203ns |       10987ns | ~same     |
+| Set       | 48677ns |       71879ns |    63500ns |        6970ns | Go - 0.7x |
+| Get       |  8990ns |       10206ns |    10083ns |       10735ns | Go - 0.9x |
 | Delete    | 33878ns |       50111ns |    49507ns |           n/a | Go - 0.7x |
 
 Apple M1 • Go 1.26.1 • [details](./maps/README.md)

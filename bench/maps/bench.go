@@ -40,7 +40,7 @@ func freeStrKeys() {
 	mem.FreeSlice(nil, strKeys)
 }
 
-func IntSet(b *testing.B) {
+func StdIntSet(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[int, int](a, 0)
@@ -54,7 +54,7 @@ func IntSet(b *testing.B) {
 	}
 }
 
-func IntGet(b *testing.B) {
+func StdIntGet(b *testing.B) {
 	m := maps.New[int, int](nil, nKeys)
 	for i := range nKeys {
 		m.Set(i, i)
@@ -67,20 +67,7 @@ func IntGet(b *testing.B) {
 	}
 }
 
-func IntHas(b *testing.B) {
-	m := maps.New[int, int](nil, nKeys)
-	for i := range nKeys {
-		m.Set(i, i)
-	}
-	defer m.Free()
-	for b.Loop() {
-		for i := range nKeys {
-			sinkBool = m.Has(i)
-		}
-	}
-}
-
-func IntDelete(b *testing.B) {
+func StdIntDel(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[int, int](a, nKeys)
@@ -97,7 +84,7 @@ func IntDelete(b *testing.B) {
 	}
 }
 
-func StrSet(b *testing.B) {
+func StdStrSet(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[string, int](a, 0)
@@ -111,7 +98,7 @@ func StrSet(b *testing.B) {
 	}
 }
 
-func StrGet(b *testing.B) {
+func StdStrGet(b *testing.B) {
 	m := maps.New[string, int](nil, nKeys)
 	for i := range nKeys {
 		m.Set(strKeys[i], i)
@@ -124,20 +111,7 @@ func StrGet(b *testing.B) {
 	}
 }
 
-func StrHas(b *testing.B) {
-	m := maps.New[string, int](nil, nKeys)
-	for i := range nKeys {
-		m.Set(strKeys[i], i)
-	}
-	defer m.Free()
-	for b.Loop() {
-		for i := range nKeys {
-			sinkBool = m.Has(strKeys[i])
-		}
-	}
-}
-
-func StrDelete(b *testing.B) {
+func StdStrDel(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[string, int](a, nKeys)
@@ -154,13 +128,39 @@ func StrDelete(b *testing.B) {
 	}
 }
 
-func BuiltinSet(b *testing.B) {
+func BtlIntSet(b *testing.B) {
 	for b.Loop() {
-		builtinSet(nKeys) // alloca only frees when the function returns
+		bltIntSet(nKeys) // alloca only frees when the function returns
 	}
 }
 
-func builtinSet(nKeys int) {
+func bltIntSet(nKeys int) {
+	m := make(map[int]int, nKeys)
+	for i := range nKeys {
+		m[i] = i
+	}
+	sinkInt = m[0]
+}
+
+func BtlIntGet(b *testing.B) {
+	m := make(map[int]int, nKeys)
+	for i := range nKeys {
+		m[i] = i
+	}
+	for b.Loop() {
+		for i := range nKeys {
+			sinkInt = m[i]
+		}
+	}
+}
+
+func BtlStrSet(b *testing.B) {
+	for b.Loop() {
+		bltStrSet(nKeys) // alloca only frees when the function returns
+	}
+}
+
+func bltStrSet(nKeys int) {
 	m := make(map[string]int, nKeys)
 	for i := range nKeys {
 		m[strKeys[i]] = i
@@ -168,7 +168,7 @@ func builtinSet(nKeys int) {
 	sinkInt = m[strKeys[0]]
 }
 
-func BuiltinGet(b *testing.B) {
+func BtlStrGet(b *testing.B) {
 	m := make(map[string]int, nKeys)
 	for i := range nKeys {
 		m[strKeys[i]] = i
@@ -180,31 +180,17 @@ func BuiltinGet(b *testing.B) {
 	}
 }
 
-func BuiltinHas(b *testing.B) {
-	m := make(map[string]int, nKeys)
-	for i := range nKeys {
-		m[strKeys[i]] = i
-	}
-	for b.Loop() {
-		for i := range nKeys {
-			_, sinkBool = m[strKeys[i]]
-		}
-	}
-}
-
 func main() {
 	initStrKeys()
 	defer freeStrKeys()
 
 	benchs := []testing.Benchmark{
-		{Name: "IntSet", F: IntSet},
-		{Name: "IntGet", F: IntGet},
-		{Name: "IntHas", F: IntHas},
-		{Name: "IntDelete", F: IntDelete},
-		{Name: "StrSet", F: StrSet},
-		{Name: "StrGet", F: StrGet},
-		{Name: "StrHas", F: StrHas},
-		{Name: "StrDelete", F: StrDelete},
+		{Name: "IntSet", F: StdIntSet},
+		{Name: "IntGet", F: StdIntGet},
+		{Name: "IntDel", F: StdIntDel},
+		{Name: "StrSet", F: StdStrSet},
+		{Name: "StrGet", F: StdStrGet},
+		{Name: "StrDel", F: StdStrDel},
 	}
 
 	fmt.Println("Malloc-based allocator:")
@@ -219,9 +205,10 @@ func main() {
 	testing.RunBenchmarks(arena, benchs)
 
 	builtinBenchs := []testing.Benchmark{
-		{Name: "BuiltinSet", F: BuiltinSet},
-		{Name: "BuiltinGet", F: BuiltinGet},
-		{Name: "BuiltinHas", F: BuiltinHas},
+		{Name: "IntSet", F: BtlIntSet},
+		{Name: "IntGet", F: BtlIntGet},
+		{Name: "StrSet", F: BtlStrSet},
+		{Name: "StrGet", F: BtlStrGet},
 	}
 	fmt.Println("Built-in map:")
 	testing.RunBenchmarks(mem.System, builtinBenchs)
