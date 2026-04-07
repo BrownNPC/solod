@@ -32,4 +32,4 @@ Not for production at the moment.
 
 _Where's the standard library?_
 
-There is a growing set of high-level packages (`so/bytes`, `so/mem`, `so/slices`, ...). There are also low-level packages that wrap the libc API (`so/c/stdlib`, `so/c/stdio`, `so/c/cstring`, ...). Check out the standard library overview for more details.
+There is a growing set of high-level packages (`so/bytes`, `so/mem`, `so/slices`, ...), and a low-level `so/c` package to help with C interop. Check out the standard library overview for more details.

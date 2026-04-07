@@ -1,9 +1,9 @@
 # So standard library
 
-Solod provides a growing set of high-level packages similar to Go's stdlib, as well as low-level packages that wrap the libc API. For full API details, see the [package documentation](https://pkg.go.dev/solod.dev/so).
+Solod provides a growing set of high-level packages similar to Go's stdlib, and a low-level package to help with C interop. For full API details, see the [package documentation](https://pkg.go.dev/solod.dev/so).
 
-High-level:
 [bytes](#sobytes) •
+[c](#soc) •
 [errors](#soerrors) •
 [fmt](#sofmt) •
 [io](#soio) •
@@ -18,16 +18,6 @@ High-level:
 [time](#sotime) •
 [unicode](#sounicode) •
 [unicode/utf8](#sounicodeutf8)
-
-Low-level:
-[c](#soc) •
-[c/assert](#socassert) •
-[c/ctype](#socctype) •
-[c/cstring](#soccstring) •
-[c/math](#socmath) •
-[c/stdio](#socstdio) •
-[c/stdlib](#socstdlib) •
-[c/time](#soctime)
 
 ## [so/bytes](https://pkg.go.dev/solod.dev/so/bytes)
 
@@ -55,6 +45,18 @@ Types:
 
 - `Buffer` is a variable-sized buffer of bytes with `Read` and `Write` methods.
 - `Reader` reads data from a byte slice.
+
+## [so/c](https://pkg.go.dev/solod.dev/so/c)
+
+Low-level C interop helpers for pointers, strings, and type information.
+
+- `Alignof` and `Sizeof` return the alignment and size of type T.
+- `Alloca` allocates an array on the stack.
+- `Assert` aborts with a message if a condition is false.
+- `Bytes`, `Slice` and `String` wrap C pointers to So types.
+- `CharPtr` - cast a `*byte` to `char*`.
+- `PtrAdd`, `PtrAs` and `PtrAt` manipulate pointers.
+- `Zero` returns the zero value of type T.
 
 ## [so/errors](https://pkg.go.dev/solod.dev/so/errors)
 
@@ -242,96 +244,3 @@ Functions to convert between runes and UTF-8 byte sequences. Offers the same API
 - `EncodeRune` writes a UTF-8-encoded rune into a byte slice.
 - `RuneCount` and `RuneCountInString` return the number of runes in a byte slice or a string.
 - `ValidString` reports whether a string consists entirely of valid UTF-8-encoded runes.
-
-## [so/c](https://pkg.go.dev/solod.dev/so/c)
-
-C-to-So type bridge for pointers and strings.
-
-- `Bytes` - wrap a C pointer and length as a byte slice.
-- `String` - convert a null-terminated C string to a So string.
-- `CharPtr` - cast a `*byte` (`uint8_t*`) to `char*` for C interop.
-
-## [so/c/assert](https://pkg.go.dev/solod.dev/so/c/assert)
-
-Runtime assertions (wraps C `<assert.h>`).
-
-- `Assert` / `Assertf` - abort if a condition is false.
-- `Enabled` - whether assertions are active.
-
-## [so/c/ctype](https://pkg.go.dev/solod.dev/so/c/ctype)
-
-Character classification and conversion (wraps C `<ctype.h>`).
-
-- `IsAlpha`, `IsDigit`, `IsAlnum`, `IsSpace`, `IsUpper`, `IsLower`, `IsPrint`, `IsPunct`, `IsGraph`, `IsCntrl`, `IsBlank`, `IsXDigit` - classify a character.
-- `ToUpper` / `ToLower` - convert case.
-
-## [so/c/cstring](https://pkg.go.dev/solod.dev/so/c/cstring)
-
-Raw memory block operations (wraps C `<string.h>`).
-
-- `Memcpy` - copy n bytes (non-overlapping).
-- `Memmove` - copy n bytes (may overlap).
-- `Memset` - fill n bytes with value.
-- `Memcmp` - compare n bytes.
-
-## [so/c/math](https://pkg.go.dev/solod.dev/so/c/math)
-
-Math constants and functions (wraps C `<math.h>`).
-
-Constants: `Pi`, `E`, `Inf`.
-
-Functions:
-
-- `Abs`, `Sqrt`, `Pow`, `Floor`, `Ceil`, `Round` - basic operations.
-- `Log`, `Log2`, `Log10`, `Exp` - logarithms and exponentials.
-- `Sin`, `Cos`, `Atan2` - trigonometry.
-- `Fmin`, `Fmax`, `Fmod` - min, max, remainder.
-
-## [so/c/stdio](https://pkg.go.dev/solod.dev/so/c/stdio)
-
-File I/O and formatted I/O (wraps C `<stdio.h>`).
-
-Streams: `Stdin`, `Stdout`, `Stderr`, `File` type, `EOF`.
-
-Seek constants: `SeekSet`, `SeekCur`, `SeekEnd`.
-
-File operations:
-
-- `Fopen` / `Fclose` - open/close files.
-- `Fread` / `Fwrite` - binary I/O.
-- `Fgetc` / `Fputc` - character I/O.
-- `Fgets` / `Fputs` - string I/O.
-- `Fseek`, `Ftell`, `Fflush`, `Feof`, `Ferror` - stream control.
-
-Formatted I/O:
-
-- `Printf` / `Fprintf` - print.
-- `Snprintf` - print to buffer.
-- `Scanf`, `Fscanf`, `Sscanf` - scan formatted input.
-
-## [so/c/stdlib](https://pkg.go.dev/solod.dev/so/c/stdlib)
-
-Process control, memory, and string conversion (wraps C `<stdlib.h>`).
-
-- `Exit` - terminate the program.
-- `Malloc` / `Calloc` / `Realloc` / `Free` - raw memory management.
-- `Atoi` / `Atof` - string-to-number conversion.
-- `Getenv` - read an environment variable.
-- `ExitSuccess`, `ExitFailure` - standard exit codes.
-
-## [so/c/time](https://pkg.go.dev/solod.dev/so/c/time)
-
-Calendar time, broken-down time, and formatting (wraps C `<time.h>`).
-
-Constants: `ClocksPerSec` - number of CPU clock ticks per second.
-
-Types: `TimeT` (calendar time), `Tm` (broken-down time with individual fields).
-
-Functions:
-
-- `Time` - current calendar time.
-- `Clock` - processor clock ticks.
-- `Difftime` - time difference in seconds.
-- `Gmtime` - convert calendar to broken-down time.
-- `Mktime` - convert broken-down time to calendar time.
-- `Strftime` - format time string.

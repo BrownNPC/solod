@@ -151,7 +151,7 @@ To learn about So's features and limitations, check out the brief [overview of t
 
 ## Standard library
 
-So provides a growing set of [high-level packages](./doc/stdlib.md) similar to Go's stdlib, as well as low-level packages that wrap the libc API.
+So provides a growing set of [packages](./doc/stdlib.md) similar to Go's stdlib.
 
 ## Playground
 
@@ -198,7 +198,7 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 
 ✅ Transpiler with basic Go features.
 
-✅ Low-level stdlib (libc wrappers). Done for now; I will add more if needed.
+✅ Low-level stdlib (libc wrappers).
 
 ⏳ Core stdlib packages: fmt, io, strings, time, ...
 
