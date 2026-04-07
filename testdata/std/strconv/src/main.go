@@ -1,6 +1,8 @@
 package main
 
-import "solod.dev/so/strconv"
+import (
+	"solod.dev/so/strconv"
+)
 
 func main() {
 	buf := make([]byte, 64)
@@ -45,6 +47,16 @@ func main() {
 		}
 	}
 	{
+		// Atof.
+		f, err := strconv.ParseFloat("1844674407370955", 64)
+		if err != nil {
+			panic("Atof error")
+		}
+		if f != float64(1844674407370955) {
+			panic("Atof value")
+		}
+	}
+	{
 		// Atoi.
 		s, err := strconv.Atoi("10")
 		if err != nil {
@@ -75,6 +87,10 @@ func main() {
 		if s != "3.1415926535" {
 			panic("FormatFloat g")
 		}
+		s = strconv.FormatFloat(buf, 1844674407370955, 'f', -1, 64)
+		if s != "1844674407370955" {
+			panic("FormatFloat big")
+		}
 	}
 	{
 		// FormatInt.
@@ -85,6 +101,18 @@ func main() {
 		s = strconv.FormatInt(buf, -42, 16)
 		if s != "-2a" {
 			panic("FormatInt base 16")
+		}
+		s = strconv.FormatInt(buf, int64(1<<31-1), 10)
+		if s != "2147483647" {
+			panic("FormatInt 31bit")
+		}
+		s = strconv.FormatInt(buf, int64(1<<56-1), 10)
+		if s != "72057594037927935" {
+			panic("FormatInt 56bit")
+		}
+		s = strconv.FormatInt(buf, int64(1<<62-1), 10)
+		if s != "4611686018427387903" {
+			panic("FormatInt 62bit")
 		}
 	}
 	{
