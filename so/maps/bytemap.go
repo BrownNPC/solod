@@ -51,7 +51,8 @@ type ByteMap struct {
 func NewByteMap(a mem.Allocator, size, ksize, vsize int) ByteMap {
 	m := ByteMap{a: a, ksize: ksize, vsize: vsize, seed: seed()}
 	sz := 8
-	for sz < size {
+	// The map must be large enough to hold size entries without resizing.
+	for int(float64(sz)*loadFactor) < size {
 		sz *= 2
 	}
 	m.hdib = mem.AllocSlice[uint64](m.a, sz, sz)

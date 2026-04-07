@@ -17,10 +17,12 @@ pkg: solod.dev/bench/maps
 cpu: Apple M1
 
 Benchmark_IntSet-8       31677    35580 ns/op     74264 B/op    20 allocs/op
+Benchmark_IntPre-8      124159     9608 ns/op     36944 B/op     5 allocs/op
 Benchmark_IntGet-8      218179     5573 ns/op         0 B/op     0 allocs/op
 Benchmark_IntDel-8       50260    23892 ns/op     36944 B/op     5 allocs/op
 
 Benchmark_StrSet-8       24082    48677 ns/op    108760 B/op    20 allocs/op
+Benchmark_StrPre-8       80437    14620 ns/op     54608 B/op     5 allocs/op
 Benchmark_StrGet-8      134481     8990 ns/op         0 B/op     0 allocs/op
 Benchmark_StrDel-8       34094    33878 ns/op     54608 B/op     5 allocs/op
 ```
@@ -29,10 +31,12 @@ So (mimalloc):
 
 ```text
 Benchmark_IntSet         20305    56696 ns/op     98112 B/op    27 allocs/op
+Benchmark_IntPre        137866     8821 ns/op     49152 B/op     3 allocs/op
 Benchmark_IntGet        734978     1638 ns/op         0 B/op     0 allocs/op
 Benchmark_IntDel         30958    38556 ns/op     73728 B/op     6 allocs/op
 
 Benchmark_StrSet         18986    71879 ns/op    130816 B/op    27 allocs/op
+Benchmark_StrPre         97383    12313 ns/op     65536 B/op     3 allocs/op
 Benchmark_StrGet        117218    10206 ns/op         0 B/op     0 allocs/op
 Benchmark_StrDel         23670    50111 ns/op     98304 B/op     6 allocs/op
 ```
@@ -41,10 +45,12 @@ So (arena):
 
 ```text
 Benchmark_IntSet         21157    57661 ns/op     98112 B/op    27 allocs/op
+Benchmark_IntPre        137257     8767 ns/op     49152 B/op     3 allocs/op
 Benchmark_IntGet        752787     1583 ns/op         0 B/op     0 allocs/op
 Benchmark_IntDel         30339    38821 ns/op     73728 B/op     6 allocs/op
 
 Benchmark_StrSet         18884    63500 ns/op    130816 B/op    27 allocs/op
+Benchmark_StrPre         99547    12115 ns/op     65536 B/op     3 allocs/op
 Benchmark_StrGet        119041    10083 ns/op         0 B/op     0 allocs/op
 Benchmark_StrDel         24212    49507 ns/op     98304 B/op     6 allocs/op
 ```

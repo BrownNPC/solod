@@ -46,7 +46,8 @@ So's built-in map is faster than Go's, but I wouldn't call it the winner because
 
 | Benchmark |      Go | So (mimalloc) | So (arena) | So (built-in) | Winner        |
 | --------- | ------: | ------------: | ---------: | ------------: | ------------- |
-| Set       | 35580ns |       56696ns |    57661ns |        3242ns | Go - 0.6x     |
+| Set       | 35580ns |       56696ns |    57661ns |           n/a | Go - 0.6x     |
+| Set (pre) |  9608ns |        8821ns |     8767ns |        3242ns | ~same         |
 | Get       |  5573ns |        1638ns |     1583ns |        2733ns | **So** - 3.4x |
 | Delete    | 23892ns |       38556ns |    38821ns |           n/a | Go - 0.6x     |
 
@@ -54,11 +55,12 @@ So's built-in map is faster than Go's, but I wouldn't call it the winner because
 
 So lookups are on par with Go, while modifications are 1.5x slower.
 
-| Benchmark |      Go | So (mimalloc) | So (arena) | So (built-in) | Winner    |
-| --------- | ------: | ------------: | ---------: | ------------: | --------- |
-| Set       | 48677ns |       71879ns |    63500ns |        6970ns | Go - 0.7x |
-| Get       |  8990ns |       10206ns |    10083ns |       10735ns | Go - 0.9x |
-| Delete    | 33878ns |       50111ns |    49507ns |           n/a | Go - 0.7x |
+| Benchmark |      Go | So (mimalloc) | So (arena) | So (built-in) | Winner        |
+| --------- | ------: | ------------: | ---------: | ------------: | ------------- |
+| Set       | 48677ns |       71879ns |    63500ns |           n/a | Go - 0.7x     |
+| Set (pre) | 14620ns |       12313ns |    12115ns |        6970ns | **So** - 1.2x |
+| Get       |  8990ns |       10206ns |    10083ns |       10735ns | Go - 0.9x     |
+| Delete    | 33878ns |       50111ns |    49507ns |           n/a | Go - 0.7x     |
 
 Apple M1 • Go 1.26.1 • [details](./maps/README.md)
 

@@ -54,6 +54,20 @@ func StdIntSet(b *testing.B) {
 	}
 }
 
+func StdIntPre(b *testing.B) {
+	a := b.Allocator()
+	for b.Loop() {
+		m := maps.New[int, int](a, nKeys)
+		for i := range nKeys {
+			m.Set(i, i)
+		}
+		m.Free()
+		if arena != nil {
+			arena.Reset()
+		}
+	}
+}
+
 func StdIntGet(b *testing.B) {
 	m := maps.New[int, int](nil, nKeys)
 	for i := range nKeys {
@@ -88,6 +102,20 @@ func StdStrSet(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[string, int](a, 0)
+		for i := range nKeys {
+			m.Set(strKeys[i], i)
+		}
+		m.Free()
+		if arena != nil {
+			arena.Reset()
+		}
+	}
+}
+
+func StdStrPre(b *testing.B) {
+	a := b.Allocator()
+	for b.Loop() {
+		m := maps.New[string, int](a, nKeys)
 		for i := range nKeys {
 			m.Set(strKeys[i], i)
 		}
@@ -186,9 +214,11 @@ func main() {
 
 	benchs := []testing.Benchmark{
 		{Name: "IntSet", F: StdIntSet},
+		{Name: "IntPre", F: StdIntPre},
 		{Name: "IntGet", F: StdIntGet},
 		{Name: "IntDel", F: StdIntDel},
 		{Name: "StrSet", F: StdStrSet},
+		{Name: "StrPre", F: StdStrPre},
 		{Name: "StrGet", F: StdStrGet},
 		{Name: "StrDel", F: StdStrDel},
 	}
