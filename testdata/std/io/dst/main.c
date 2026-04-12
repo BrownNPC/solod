@@ -75,7 +75,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(buf), so_str("hello world"))) {
             so_panic("ReadAll failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, buf);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (buf));
     }
     {
         // ReadFull.

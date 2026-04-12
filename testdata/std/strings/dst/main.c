@@ -109,7 +109,7 @@ int main(void) {
             so_panic("Join failed");
         }
         mem_FreeString((mem_Allocator){0}, j);
-        mem_FreeSlice(so_String, (mem_Allocator){0}, parts);
+        mem_FreeSlice(so_String, ((mem_Allocator){0}), (parts));
     }
     {
         // ToUpper and ToLower.

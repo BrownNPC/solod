@@ -291,12 +291,15 @@ func (g *Generator) emitGenericCall(n *ast.CallExpr, fun ast.Expr, inst types.In
 	}
 	sig, _ := inst.Type.(*types.Signature)
 	for i, arg := range n.Args {
-		fmt.Fprintf(w, ", ")
+		// Wrap args in parens to protect against
+		// the preprocessor misinterpreting commas.
+		fmt.Fprintf(w, ", (")
 		if sig != nil && i < sig.Params().Len() {
 			g.emitExprAsType(n, arg, sig.Params().At(i).Type())
 		} else {
 			g.emitExpr(arg)
 		}
+		fmt.Fprintf(w, ")")
 	}
 	fmt.Fprintf(w, ")")
 }
@@ -375,7 +378,7 @@ func (g *Generator) emitIdent(n *ast.Ident) {
 		}
 	}
 	if g.state.macroParams[name] {
-		fmt.Fprintf(g.state.writer, "(%s_)", name)
+		fmt.Fprintf(g.state.writer, "%s_", name)
 		return
 	}
 	fmt.Fprintf(g.state.writer, "%s", name)

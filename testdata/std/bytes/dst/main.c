@@ -18,7 +18,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(clone), so_str("abc"))) {
             so_panic("Clone failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, clone);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (clone));
     }
     {
         // Compare and Equal.
@@ -114,7 +114,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(joined), so_str("go is fun"))) {
             so_panic("Join failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, joined);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (joined));
     }
     {
         // Map.
@@ -123,7 +123,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(mapped), so_str("....."))) {
             so_panic("Map failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, mapped);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (mapped));
     }
     {
         // Repeat.
@@ -132,7 +132,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(repeated), so_str("abcabcabc"))) {
             so_panic("Repeat failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, repeated);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (repeated));
     }
     {
         // Replace.
@@ -141,12 +141,12 @@ int main(void) {
         if (so_string_ne(so_bytes_string(r1), so_str("hexlo"))) {
             so_panic("Replace failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, r1);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (r1));
         so_Slice r2 = bytes_Replace((mem_Allocator){0}, b, so_string_bytes(so_str("l")), so_string_bytes(so_str("x")), -1);
         if (so_string_ne(so_bytes_string(r2), so_str("hexxo"))) {
             so_panic("ReplaceAll failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, r2);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (r2));
     }
     {
         // Runes.
@@ -158,7 +158,7 @@ int main(void) {
         if (so_at(so_rune, runes, 0) != U'f' || so_at(so_rune, runes, 1) != U'u' || so_at(so_rune, runes, 2) != U'n') {
             so_panic("Runes failed");
         }
-        mem_FreeSlice(so_rune, (mem_Allocator){0}, runes);
+        mem_FreeSlice(so_rune, ((mem_Allocator){0}), (runes));
     }
     {
         // Split and SplitN.
@@ -170,7 +170,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(so_at(so_Slice, s1, 0)), so_str("go")) || so_string_ne(so_bytes_string(so_at(so_Slice, s1, 1)), so_str("is")) || so_string_ne(so_bytes_string(so_at(so_Slice, s1, 2)), so_str("fun"))) {
             so_panic("Split failed");
         }
-        mem_FreeSlice(so_Slice, (mem_Allocator){0}, s1);
+        mem_FreeSlice(so_Slice, ((mem_Allocator){0}), (s1));
         so_Slice s2 = bytes_SplitN((mem_Allocator){0}, b, so_string_bytes(so_str(" ")), 2);
         if (so_len(s2) != 2) {
             so_panic("SplitN failed");
@@ -178,7 +178,7 @@ int main(void) {
         if (so_string_ne(so_bytes_string(so_at(so_Slice, s2, 0)), so_str("go")) || so_string_ne(so_bytes_string(so_at(so_Slice, s2, 1)), so_str("is fun"))) {
             so_panic("SplitN failed");
         }
-        mem_FreeSlice(so_Slice, (mem_Allocator){0}, s2);
+        mem_FreeSlice(so_Slice, ((mem_Allocator){0}), (s2));
     }
     {
         // Trim, TrimLeft, TrimRight.
@@ -210,12 +210,12 @@ int main(void) {
         if (so_string_ne(so_bytes_string(lowered), so_str("hello"))) {
             so_panic("ToLower failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, lowered);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (lowered));
         so_Slice uppered = bytes_ToUpper((mem_Allocator){0}, b);
         if (so_string_ne(so_bytes_string(uppered), so_str("HELLO"))) {
             so_panic("ToUpper failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, uppered);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (uppered));
     }
     {
         // Buffer (stack-allocated).
@@ -277,6 +277,6 @@ int main(void) {
         if (bytes_Reader_Len(&r) != 0) {
             so_panic("Reader Len failed");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
     }
 }

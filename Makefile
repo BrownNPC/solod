@@ -48,6 +48,11 @@ dist:
 	@tar -czf dist/solod.tar.gz -C dist solod
 	@echo "Created dist/solod.tar.gz"
 
+update-dst:
+	make run-case name=$(name)
+	cp generated/$(name)/main.* testdata/$(name)/dst
+	go test -run TestTranslate/$(name) ./internal/compiler
+
 run-cases:
 	@make run-cases-by pattern="testdata/lang/*/ testdata/std/*/"
 

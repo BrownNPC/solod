@@ -231,15 +231,16 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 	cName := cStructType + "_" + sel.Sel.Name
 	fmt.Fprintf(w, "%s(", cName)
 
-	// Prepend type arguments for generic method calls.
 	typeArgs := named.TypeArgs()
-	for i := 0; i < typeArgs.Len(); i++ {
-		if i > 0 {
-			fmt.Fprintf(w, ", ")
+	isGeneric := typeArgs.Len() > 0
+	// Prepend type arguments for generic method calls.
+	if isGeneric {
+		for i := 0; i < typeArgs.Len(); i++ {
+			if i > 0 {
+				fmt.Fprintf(w, ", ")
+			}
+			fmt.Fprintf(w, "%s", g.mapType(sel, typeArgs.At(i)))
 		}
-		fmt.Fprintf(w, "%s", g.mapType(sel, typeArgs.At(i)))
-	}
-	if typeArgs.Len() > 0 {
 		fmt.Fprintf(w, ", ")
 	}
 
@@ -249,6 +250,14 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 	xType := g.types.TypeOf(sel.X)
 	_, isCallSitePtr := xType.Underlying().(*types.Pointer)
 
+	// For generic (= macro) calls, wrap non-type args in parens to protect
+	// against the preprocessor misinterpreting commas.
+	lparen, rparen := "", ""
+	if isGeneric {
+		lparen, rparen = "(", ")"
+	}
+
+	fmt.Fprintf(w, "%s", lparen)
 	if isMethodPtrRecv {
 		// Pointer receiver: pass address of value, or pointer directly.
 		if isCallSitePtr {
@@ -266,11 +275,13 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 			g.emitExpr(sel.X)
 		}
 	}
+	fmt.Fprintf(w, "%s", rparen)
 
 	// Pass method arguments.
 	for i, arg := range args {
-		fmt.Fprintf(w, ", ")
+		fmt.Fprintf(w, ", %s", lparen)
 		g.emitExprAsType(sel, arg, sig.Params().At(i).Type())
+		fmt.Fprint(w, rparen)
 	}
 	fmt.Fprintf(w, ")")
 }

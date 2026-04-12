@@ -28,11 +28,11 @@ static void basicTest(void) {
             so_panic("ReadFile failed");
         }
         if (so_string_ne(so_bytes_string(b), so_bytes_string(data))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(name);
             so_panic("ReadFile: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
     {
@@ -134,11 +134,11 @@ static void basicTest(void) {
             so_panic("ReadFile failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("hello"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(name);
             so_panic("WriteString: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
     {
@@ -243,11 +243,11 @@ static void fileTest(void) {
             so_panic("ReadFile after OpenFile failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("openfile"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(name);
             so_panic("OpenFile: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
     {
@@ -312,12 +312,12 @@ static void fileTest(void) {
             so_panic("ReadFile hard link failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("linked"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(hard);
             os_Remove(target);
             so_panic("Hard link: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(hard);
         os_Remove(target);
     }
@@ -404,11 +404,11 @@ static void fileTest(void) {
             so_panic("ReadFile after Truncate failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("abc"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(name);
             so_panic("Truncate: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
     {
@@ -432,11 +432,11 @@ static void fileTest(void) {
             so_panic("ReadFile after append failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("hello world"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(name);
             so_panic("Append: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
     {
@@ -514,11 +514,11 @@ static void fileTest(void) {
             so_panic("ReadFile after Rename failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("renamed"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(newName);
             so_panic("Rename: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(newName);
     }
     {
@@ -736,11 +736,11 @@ static void seekTest(void) {
             so_panic("ReadFile failed");
         }
         if (so_string_ne(so_bytes_string(b), so_str("hello WORLD"))) {
-            mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+            mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
             os_Remove(name);
             so_panic("WriteAt: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
 }
@@ -960,7 +960,7 @@ static void tempTest(void) {
         if (so_string_ne(so_bytes_string(b), so_str("temp data"))) {
             so_panic("CreateTemp: wrong data");
         }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, b);
+        mem_FreeSlice(so_byte, ((mem_Allocator){0}), (b));
         os_Remove(name);
     }
     {

@@ -135,4 +135,13 @@ func allocTest() {
 		// Free with defer.
 		withDefer()
 	}
+	{
+		// Tracking allocator.
+		track := &mem.Tracker{Allocator: mem.System}
+		p := mem.Alloc[Point](track)
+		mem.Free(track, p)
+		if track.Stats.Alloc != 0 {
+			panic("Tracker: Stats.Alloc != 0")
+		}
+	}
 }

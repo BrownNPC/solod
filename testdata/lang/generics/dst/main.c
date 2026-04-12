@@ -12,13 +12,13 @@ int main(void) {
         if (*v != 42) {
             so_panic("unexpected value");
         }
-        freeObj(so_int, v);
+        freeObj(so_int, (v));
     }
     {
         // Generic extern function (multiple type parameters),
         // generic extern type, generic extern method.
-        main_Map m = newMap(so_String, so_int, 10);
-        if (main_Map_Len(so_String, so_int, &m) != 10) {
+        main_Map m = newMap(so_String, so_int, (10));
+        if (main_Map_Len(so_String, so_int, (&m)) != 10) {
             so_panic("unexpected map size");
         }
     }
