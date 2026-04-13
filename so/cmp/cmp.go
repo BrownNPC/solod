@@ -61,17 +61,6 @@ func FuncFor[T any]() Func {
 	}
 }
 
-// Less reports whether x is less than y.
-// For floating-point types, a NaN is considered less than any non-NaN,
-// and -0.0 is not less than (is equal to) 0.0.
-//
-//so:inline
-func Less[T cmp.Ordered](x, y T) bool {
-	_fn := FuncFor[T]()
-	c.Assert(_fn != nil, "cmp: unsupported ordered type")
-	return _fn(&x, &y) < 0
-}
-
 // Compare returns
 //
 //	-1 if x is less than y,
@@ -102,4 +91,15 @@ func Equal[T comparable](x, y T) bool {
 		_eq = mem.Compare(&x, &y, c.Sizeof[T]()) == 0
 	}
 	return _eq
+}
+
+// Less reports whether x is less than y.
+// For floating-point types, a NaN is considered less than any non-NaN,
+// and -0.0 is not less than (is equal to) 0.0.
+//
+//so:inline
+func Less[T cmp.Ordered](x, y T) bool {
+	_fn := FuncFor[T]()
+	c.Assert(_fn != nil, "cmp: unsupported ordered type")
+	return _fn(&x, &y) < 0
 }

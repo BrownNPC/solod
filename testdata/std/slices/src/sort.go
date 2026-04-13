@@ -153,3 +153,26 @@ func sortTest() {
 		slices.Free(nil, s)
 	}
 }
+
+func minMaxTest() {
+	{
+		// Min and Max on ints.
+		ints := []int{3, 1, 4, 1, 5, 9}
+		if slices.Min(ints) != 1 {
+			panic("Min ints: wrong value")
+		}
+		if slices.Max(ints) != 9 {
+			panic("Max ints: wrong value")
+		}
+	}
+	{
+		// Min and Max on strings.
+		strs := []string{"banana", "apple", "cherry"}
+		if slices.Min(strs) != "apple" {
+			panic("Min strings: wrong value")
+		}
+		if slices.Max(strs) != "cherry" {
+			panic("Max strings: wrong value")
+		}
+	}
+}

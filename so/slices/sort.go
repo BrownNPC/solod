@@ -126,3 +126,61 @@ func IsSortedWith(s Sorter) bool {
 	}
 	return true
 }
+
+// Min returns the minimal value in x. It panics if x is empty.
+// For floating-point numbers, Min propagates NaNs (any NaN value in x
+// forces the output to be NaN).
+//
+//so:inline
+func Min[T gocmp.Ordered](x []T) T {
+	return MinFunc(x, cmp.FuncFor[T]())
+}
+
+// MinFunc returns the minimal value in x, using cmp to compare elements.
+// It panics if x is empty. If there is more than one minimal element
+// according to the cmp function, MinFunc returns the first one.
+//
+//so:inline
+func MinFunc[T any](x []T, compare cmp.Func) T {
+	_x := x
+	if len(_x) < 1 {
+		panic("slices: empty list")
+	}
+	_m := _x[0]
+	for _j := 1; _j < len(_x); _j++ {
+		_xj := _x[_j]
+		if compare(&_xj, &_m) < 0 {
+			_m = _xj
+		}
+	}
+	return _m
+}
+
+// Max returns the maximal value in x. It panics if x is empty.
+// For floating-point E, Max propagates NaNs (any NaN value in x
+// forces the output to be NaN).
+//
+//so:inline
+func Max[T gocmp.Ordered](x []T) T {
+	return MaxFunc(x, cmp.FuncFor[T]())
+}
+
+// MaxFunc returns the maximal value in x, using cmp to compare elements.
+// It panics if x is empty. If there is more than one maximal element
+// according to the cmp function, MaxFunc returns the first one.
+//
+//so:inline
+func MaxFunc[T any](x []T, compare cmp.Func) T {
+	_x := x
+	if len(_x) < 1 {
+		panic("slices.MaxFunc: empty list")
+	}
+	_m := _x[0]
+	for _j := 1; _j < len(_x); _j++ {
+		_xj := _x[_j]
+		if compare(&_xj, &_m) > 0 {
+			_m = _xj
+		}
+	}
+	return _m
+}

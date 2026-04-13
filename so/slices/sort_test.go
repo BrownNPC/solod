@@ -5,6 +5,8 @@
 package slices_test
 
 import (
+	"cmp"
+	"fmt"
 	"math/rand"
 	"testing"
 
@@ -158,4 +160,116 @@ func TestStability(t *testing.T) {
 	if !data.inOrder(false) {
 		t.Errorf("Stable wasn't stable on %d ints", n)
 	}
+}
+
+type S struct {
+	a int
+	b string
+}
+
+func cmpS(s1, s2 any) int {
+	v1 := *c.PtrAs[S](s1)
+	v2 := *c.PtrAs[S](s2)
+	return cmp.Compare(v1.a, v2.a)
+}
+
+func TestMinMax(t *testing.T) {
+	intCmp := func(a, b any) int {
+		va := *c.PtrAs[int](a)
+		vb := *c.PtrAs[int](b)
+		return va - vb
+	}
+
+	tests := []struct {
+		data    []int
+		wantMin int
+		wantMax int
+	}{
+		{[]int{7}, 7, 7},
+		{[]int{1, 2}, 1, 2},
+		{[]int{2, 1}, 1, 2},
+		{[]int{1, 2, 3}, 1, 3},
+		{[]int{3, 2, 1}, 1, 3},
+		{[]int{2, 1, 3}, 1, 3},
+		{[]int{2, 2, 3}, 2, 3},
+		{[]int{3, 2, 3}, 2, 3},
+		{[]int{0, 2, -9}, -9, 2},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.data), func(t *testing.T) {
+			gotMin := Min(tt.data)
+			if gotMin != tt.wantMin {
+				t.Errorf("Min got %v, want %v", gotMin, tt.wantMin)
+			}
+
+			gotMinFunc := MinFunc(tt.data, intCmp)
+			if gotMinFunc != tt.wantMin {
+				t.Errorf("MinFunc got %v, want %v", gotMinFunc, tt.wantMin)
+			}
+
+			gotMax := Max(tt.data)
+			if gotMax != tt.wantMax {
+				t.Errorf("Max got %v, want %v", gotMax, tt.wantMax)
+			}
+
+			gotMaxFunc := MaxFunc(tt.data, intCmp)
+			if gotMaxFunc != tt.wantMax {
+				t.Errorf("MaxFunc got %v, want %v", gotMaxFunc, tt.wantMax)
+			}
+		})
+	}
+
+	svals := []S{
+		{1, "a"},
+		{2, "a"},
+		{1, "b"},
+		{2, "b"},
+	}
+
+	gotMin := MinFunc(svals, cmpS)
+	wantMin := S{1, "a"}
+	if gotMin != wantMin {
+		t.Errorf("MinFunc(%v) = %v, want %v", svals, gotMin, wantMin)
+	}
+
+	gotMax := MaxFunc(svals, cmpS)
+	wantMax := S{2, "a"}
+	if gotMax != wantMax {
+		t.Errorf("MaxFunc(%v) = %v, want %v", svals, gotMax, wantMax)
+	}
+}
+
+func TestMinMaxPanics(t *testing.T) {
+	intCmp := func(a, b any) int {
+		va := *c.PtrAs[int](a)
+		vb := *c.PtrAs[int](b)
+		return va - vb
+	}
+	emptySlice := []int{}
+
+	if !panics(func() { _ = Min(emptySlice) }) {
+		t.Errorf("Min([]): got no panic, want panic")
+	}
+
+	if !panics(func() { _ = Max(emptySlice) }) {
+		t.Errorf("Max([]): got no panic, want panic")
+	}
+
+	if !panics(func() { _ = MinFunc(emptySlice, intCmp) }) {
+		t.Errorf("MinFunc([]): got no panic, want panic")
+	}
+
+	if !panics(func() { _ = MaxFunc(emptySlice, intCmp) }) {
+		t.Errorf("MaxFunc([]): got no panic, want panic")
+	}
+}
+
+func panics(f func()) (b bool) {
+	defer func() {
+		if x := recover(); x != nil {
+			b = true
+		}
+	}()
+	f()
+	return false
 }

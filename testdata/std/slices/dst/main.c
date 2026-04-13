@@ -4,10 +4,12 @@
 static void sliceTest(void);
 static so_int descInt(void* a, void* b);
 static void sortTest(void);
+static void minMaxTest(void);
 
 // -- main.go --
 
 int main(void) {
+    minMaxTest();
     sliceTest();
     sortTest();
 }
@@ -268,5 +270,28 @@ static void sortTest(void) {
             so_panic("SortStable strings: wrong values");
         }
         slices_Free(so_String, ((mem_Allocator){0}), (s));
+    }
+}
+
+static void minMaxTest(void) {
+    {
+        // Min and Max on ints.
+        so_Slice ints = (so_Slice){(so_int[6]){3, 1, 4, 1, 5, 9}, 6, 6};
+        if (slices_Min(so_int, (ints)) != 1) {
+            so_panic("Min ints: wrong value");
+        }
+        if (slices_Max(so_int, (ints)) != 9) {
+            so_panic("Max ints: wrong value");
+        }
+    }
+    {
+        // Min and Max on strings.
+        so_Slice strs = (so_Slice){(so_String[3]){so_str("banana"), so_str("apple"), so_str("cherry")}, 3, 3};
+        if (so_string_ne(slices_Min(so_String, (strs)), so_str("apple"))) {
+            so_panic("Min strings: wrong value");
+        }
+        if (so_string_ne(slices_Max(so_String, (strs)), so_str("cherry"))) {
+            so_panic("Max strings: wrong value");
+        }
     }
 }
