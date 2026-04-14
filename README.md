@@ -217,7 +217,7 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 ```text
 ✗ bufio       ✓ fmt     ✓ os        ✓ strings
 ✓ bytes       ✓ io      ✗ rand      ✓ strconv
-✗ filepath    ✗ maps    ✗ slices    ✓ time
+✗ filepath    ✓ maps    ✓ slices    ✓ time
 ✗ flag        ✓ math    ✗ slog      ✓ unicode
 ```
 
