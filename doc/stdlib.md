@@ -5,6 +5,7 @@ Solod provides a growing set of high-level packages similar to Go's stdlib, and 
 [bytes](#sobytes) •
 [c](#soc) •
 [cmp](#socmp) •
+[crypto/crand](#socryptocrand) •
 [encoding/binary](#soencodingbinary) •
 [errors](#soerrors) •
 [fmt](#sofmt) •
@@ -76,6 +77,14 @@ Types:
 
 - `Func` is a comparison function `func(a, b any) int`.
 - `FuncFor` returns the appropriate comparison function for type T.
+
+## [so/crypto/crand](https://pkg.go.dev/solod.dev/so/crypto/crand)
+
+Cryptographically secure random number generation.
+
+- `Read` fills a slice with cryptographically secure random bytes.
+- `Reader` is a global instance of a cryptographically secure RNG.
+- `Text` returns a cryptographically random string using the base32 alphabet.
 
 ## [so/encoding/binary](https://pkg.go.dev/solod.dev/so/encoding/binary)
 

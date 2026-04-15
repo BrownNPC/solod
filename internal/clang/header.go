@@ -169,6 +169,6 @@ func isIgnoredPackage(path string) bool {
 	// unsafe is implemented in builtin.h,
 	// so they neither requires a #include directive.
 	// Other ignored packages are only used for extern functions in tests.
-	return path == "cmp" || path == "embed" || path == "fmt" ||
-		path == "math" || path == "unsafe"
+	return path == "cmp" || path == "crypto/rand" || path == "embed" ||
+		path == "fmt" || path == "math" || path == "unsafe"
 }
