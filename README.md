@@ -192,9 +192,11 @@ So generates C11 code that relies on several GCC/Clang extensions:
 - `__typeof__` for type inference in generic macros.
 - `alloca` and VLAs for `make()` and other dynamic stack allocations.
 
-You can use GCC, Clang, or `zig cc` to compile the transpiled C code. MSVC is not supported.
+Supported compilers: GCC, Clang, and `zig cc`. MSVC is not supported.
 
 Supported operating systems: Linux, macOS, and Windows (core language only).
+
+Supported platforms: amd64 and arm64.
 
 ## Design principles
 
@@ -212,20 +214,18 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 
 ✅ Limited generics and maps.
 
-⏳ Core stdlib packages:
+⏳ Core stdlib packages (v0.1):
 
 ```text
 ✗ bufio       ✓ fmt     ✓ os        ✓ strings
-✓ bytes       ✓ io      ✗ rand      ✓ strconv
+✓ bytes       ✓ io      ✓ rand      ✓ strconv
 ✗ filepath    ✓ maps    ✓ slices    ✓ time
 ✗ flag        ✓ math    ✗ slog      ✓ unicode
 ```
 
-⬜ Example applications.
+⬜ Networking (v0.2)
 
-⬜ Concurrency.
-
-⬜ More stdlib packages: crypto, http, json, regexp, ...
+⬜ Concurrency (v0.3)
 
 🤔 Full Windows support.
 
