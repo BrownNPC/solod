@@ -15,19 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-// --- General utilities ---
-#define SO_CONCAT(a, b) a##b
-#define SO_NAME(a, b) SO_CONCAT(a, b)
-
-#define so_typeof __typeof__
-#define so_auto __auto_type
-
-typedef uint8_t so_byte;
-typedef int32_t so_rune;
-typedef int64_t so_int;
-typedef uint64_t so_uint;
-
 // --- Build metadata ---
+
 #if !defined(so_version)
 #define so_version "(devel)"
 #endif
@@ -55,6 +44,21 @@ typedef uint64_t so_uint;
 #elif defined(__riscv) && __riscv_xlen == 64
 #define so_build_riscv64
 #endif
+
+_Static_assert(sizeof(void*) == 8, "64-bit platform required");
+
+// --- General utilities ---
+
+#define SO_CONCAT(a, b) a##b
+#define SO_NAME(a, b) SO_CONCAT(a, b)
+
+#define so_typeof __typeof__
+#define so_auto __auto_type
+
+typedef uint8_t so_byte;
+typedef int32_t so_rune;
+typedef int64_t so_int;
+typedef uint64_t so_uint;
 
 // --- Alloca safety ---
 
