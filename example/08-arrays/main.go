@@ -4,7 +4,7 @@
 // scenarios.
 package main
 
-import "solod.dev/so/c/stdio"
+import "solod.dev/so/fmt"
 
 func main() {
 	// Here we create an array `a` that will hold exactly
@@ -48,7 +48,7 @@ func main() {
 			twoD[i][j] = int32(i + j)
 		}
 	}
-	stdio.Printf("2d: [%d...%d]\n", twoD[0][0], twoD[1][2])
+	fmt.Printf("2d: [%d...%d]\n", twoD[0][0], twoD[1][2])
 
 	// You can create and initialize multi-dimensional
 	// arrays at once too.
@@ -56,9 +56,9 @@ func main() {
 		{1, 2, 3},
 		{1, 2, 3},
 	}
-	stdio.Printf("2d: [%d...%d]\n", twoD[0][0], twoD[1][2])
+	fmt.Printf("2d: [%d...%d]\n", twoD[0][0], twoD[1][2])
 }
 
 func printArray(msg string, arr [3]int32) {
-	stdio.Printf("%s [%d %d %d]\n", msg, arr[0], arr[1], arr[2])
+	fmt.Printf("%s [%d %d %d]\n", msg, arr[0], arr[1], arr[2])
 }

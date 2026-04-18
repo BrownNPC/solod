@@ -6,7 +6,7 @@
 // an integer that represents a Unicode code point.
 package main
 
-import "solod.dev/so/c/stdio"
+import "solod.dev/so/fmt"
 
 func main() {
 	// `s` is a `string` assigned a literal value
@@ -23,7 +23,7 @@ func main() {
 	// each index. This loop generates the hex values of all
 	// the bytes that constitute the code points in `s`.
 	for i := 0; i < len(s); i++ {
-		stdio.Printf("%x ", s[i])
+		fmt.Printf("%x ", s[i])
 	}
 	println()
 
@@ -40,7 +40,7 @@ func main() {
 	// A `range` loop handles strings specially and decodes
 	// each `rune` along with its offset in the string.
 	for idx, runeValue := range s {
-		stdio.Printf("0x%x starts at %d\n", runeValue, int32(idx))
+		fmt.Printf("0x%x starts at %d\n", runeValue, int32(idx))
 		// This demonstrates passing a `rune` value to a function.
 		examineRune(runeValue)
 	}

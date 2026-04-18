@@ -5,7 +5,7 @@
 
 package main
 
-import "solod.dev/so/c/stdio"
+import "solod.dev/so/fmt"
 
 func main() {
 
@@ -16,7 +16,7 @@ func main() {
 	for _, num := range nums {
 		sum += num
 	}
-	stdio.Printf("sum: %d\n", int32(sum))
+	fmt.Printf("sum: %d\n", int32(sum))
 
 	// `range` on arrays and slices provides both the
 	// index and value for each entry. Above we didn't
@@ -25,7 +25,7 @@ func main() {
 	// the indexes though.
 	for i, num := range nums {
 		if num == 3 {
-			stdio.Printf("index: %d\n", int32(i))
+			fmt.Printf("index: %d\n", int32(i))
 		}
 	}
 
@@ -35,6 +35,6 @@ func main() {
 	// See "Strings and Runes" for more
 	// details.
 	for i, c := range "go" {
-		stdio.Printf("%d %c\n", int32(i), c)
+		fmt.Printf("%d %c\n", int32(i), c)
 	}
 }
