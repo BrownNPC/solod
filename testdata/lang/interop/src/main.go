@@ -12,6 +12,7 @@ type Account struct {
 	name    string
 	balance int64
 	flags   []uint8
+	write   func(a *Account, format string, args ...any)
 }
 
 func account_inc_balance(acc *Account, amount int64) int64
@@ -21,6 +22,9 @@ func account_set_name(acc *Account, name string)
 
 //so:extern
 func printf(format string, args ...any) int
+
+//so:extern
+func write_acc(acc *Account, format string, args ...any)
 
 func main() {
 	{
@@ -59,5 +63,16 @@ func main() {
 		if maxInt64 <= 1<<62 {
 			panic("maxInt64 <= 1<<62")
 		}
+	}
+	{
+		// Extern variadic function.
+		acc := Account{name: "Bob"}
+		write_acc(&acc, "Hello %s!", "world")
+	}
+	{
+		// Extern function pointer.
+		acc := Account{name: "Charlie"}
+		acc.write = write_acc
+		acc.write(&acc, "Balance: %d", 123)
 	}
 }

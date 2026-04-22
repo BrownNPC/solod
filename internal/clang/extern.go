@@ -25,6 +25,7 @@ func (g *Generator) collectFileExterns(pkgName string, file *ast.File) {
 				switch s := spec.(type) {
 				case *ast.TypeSpec:
 					g.markExtern(pkgName, s.Name.Name, info)
+					g.markExternFields(pkgName, s, info)
 				case *ast.ValueSpec:
 					for _, name := range s.Names {
 						g.markExtern(pkgName, name.Name, info)
@@ -54,8 +55,52 @@ func (g *Generator) callExtern(call *ast.CallExpr) (externInfo, bool) {
 				return g.getExtern(pkgName.Name(), fun.Sel.Name)
 			}
 		}
+		// Function pointer field on an extern struct (e.g. acc.write(...)).
+		return g.callExternField(fun)
 	}
 	return externInfo{}, false
+}
+
+// callExternField checks whether a selector targets a function pointer field
+// on an extern struct (e.g. acc.write).
+func (g *Generator) callExternField(sel *ast.SelectorExpr) (externInfo, bool) {
+	selection, ok := g.types.Selections[sel]
+	if !ok || selection.Kind() != types.FieldVal {
+		return externInfo{}, false
+	}
+	recv := selection.Recv()
+	if ptr, ok := recv.(*types.Pointer); ok {
+		recv = ptr.Elem()
+	}
+	named, ok := recv.(*types.Named)
+	if !ok {
+		return externInfo{}, false
+	}
+	pkgName := ""
+	if typePkg := named.Obj().Pkg(); typePkg != nil && typePkg.Path() != g.pkg.PkgPath {
+		// The type is imported from another package.
+		pkgName = typePkg.Name()
+	}
+	return g.getExtern(pkgName, named.Obj().Name()+"."+sel.Sel.Name)
+}
+
+// markExternFields registers function pointer fields of an extern struct type,
+// so that calls like acc.write(...) can be resolved via a map lookup.
+func (g *Generator) markExternFields(pkgName string, spec *ast.TypeSpec, info externInfo) {
+	obj := g.types.Defs[spec.Name]
+	if obj == nil {
+		return
+	}
+	st, ok := obj.Type().Underlying().(*types.Struct)
+	if !ok {
+		return
+	}
+	fieldInfo := externInfo{nodecay: info.nodecay}
+	for field := range st.Fields() {
+		if _, ok := field.Type().(*types.Signature); ok {
+			g.markExtern(pkgName, spec.Name.Name+"."+field.Name(), fieldInfo)
+		}
+	}
 }
 
 // markExtern marks a symbol in a package as extern.

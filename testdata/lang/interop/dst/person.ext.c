@@ -1,4 +1,5 @@
 #include <inttypes.h>
+#include <stdarg.h>
 #include "person.ext.h"
 
 int64_t account_inc_balance(Account* a, int64_t amount) {
@@ -12,4 +13,13 @@ int64_t account_inc_balance(Account* a, int64_t amount) {
 
 void account_set_name(Account* a, so_String name) {
     a->name = name;
+}
+
+void write_acc(Account* a, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    printf("Account %s: ", a->name.ptr);
+    vprintf(fmt, args);
+    printf("\n");
+    va_end(args);
 }

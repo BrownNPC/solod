@@ -33,4 +33,15 @@ int main(void) {
             so_panic("maxInt64 <= 1<<62");
         }
     }
+    {
+        // Extern variadic function.
+        Account acc = (Account){.name = so_str("Bob")};
+        write_acc(&acc, "Hello %s!", "world");
+    }
+    {
+        // Extern function pointer.
+        Account acc = (Account){.name = so_str("Charlie")};
+        acc.write = write_acc;
+        acc.write(&acc, "Balance: %d", 123);
+    }
 }
