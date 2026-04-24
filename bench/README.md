@@ -2,10 +2,25 @@
 
 Here are some benchmarks that show how So performs on common tasks compared to Go.
 
+[Bufio](#buffered-io) •
 [Bytes](#byte-functions) •
 [Maps](#maps) •
 [Strings](#string-conversion) •
 [Time](#time)
+
+## Buffered I/O
+
+So is ~3x faster than Go for reading and writing, and ~4x faster for scanning.
+
+| Benchmark           |     Go |     So | Winner        |
+| ------------------- | -----: | -----: | ------------- |
+| Reader (buffered)   | 3089ns | 1073ns | **So** - 2.9x |
+| Reader (unbuffered) | 1269ns |  412ns | **So** - 3.1x |
+| Writer (buffered)   | 2988ns | 1038ns | **So** - 2.9x |
+| Writer (unbuffered) | 4928ns | 1537ns | **So** - 3.2x |
+| Scanner             |  443ns |  112ns | **So** - 4.0x |
+
+Apple M1 • Go 1.26.1 • [details](./bufio/README.md)
 
 ## Byte functions
 
