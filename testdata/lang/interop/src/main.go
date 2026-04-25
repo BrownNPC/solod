@@ -1,5 +1,7 @@
 package main
 
+import "example/interop/src/sub"
+
 //so:include <stdint.h>
 //so:include <stdio.h>
 //so:include "person.ext.h"
@@ -85,5 +87,11 @@ func main() {
 		acc := Acc{write: write_acc}
 		target := Account{name: "Diana"}
 		acc.write(&target, "Balance: %d", 456)
+	}
+	{
+		// Extern function pointer from a different package.
+		var s sub.Stream
+		s.Write = sub.Discard
+		s.Write("Hello, %s!", "world")
 	}
 }

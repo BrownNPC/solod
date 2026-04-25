@@ -25,7 +25,7 @@ func (g *Generator) collectFileExterns(typesInfo *types.Info, file *ast.File) {
 				switch s := spec.(type) {
 				case *ast.TypeSpec:
 					g.markExtern(typesInfo.Defs[s.Name], info)
-					g.markExternFields(s, info)
+					g.markExternFields(typesInfo, s, info)
 				case *ast.ValueSpec:
 					for _, name := range s.Names {
 						g.markExtern(typesInfo.Defs[name], info)
@@ -78,8 +78,8 @@ func (g *Generator) callExternField(sel *ast.SelectorExpr) (externInfo, bool) {
 
 // markExternFields registers function pointer fields of an extern struct type,
 // so that calls like acc.write(...) can be resolved via a map lookup.
-func (g *Generator) markExternFields(spec *ast.TypeSpec, info externInfo) {
-	obj := g.types.Defs[spec.Name]
+func (g *Generator) markExternFields(typesInfo *types.Info, spec *ast.TypeSpec, info externInfo) {
+	obj := typesInfo.Defs[spec.Name]
 	if obj == nil {
 		return
 	}

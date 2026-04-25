@@ -49,4 +49,10 @@ int main(void) {
         Account target = (Account){.name = so_str("Diana")};
         acc.write(&target, "Balance: %d", 456);
     }
+    {
+        // Extern function pointer from a different package.
+        Stream s = {0};
+        s.Write = Discard;
+        s.Write("Hello, %s!", "world");
+    }
 }
