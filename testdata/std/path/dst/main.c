@@ -25,19 +25,19 @@ int main(void) {
     }
     {
         // Join.
-        so_String path = path_Join((mem_Allocator){0}, (so_Slice){(so_String[3]){so_str("opt"), so_str("app"), so_str("config.json")}, 3, 3});
-        if (so_string_ne(path, so_str("opt/app/config.json"))) {
-            so_panic(so_cstr(so_string_add(so_str("unexpected path: "), path)));
+        so_String joined = path_Join((mem_Allocator){0}, (so_Slice){(so_String[3]){so_str("opt"), so_str("app"), so_str("config.json")}, 3, 3});
+        if (so_string_ne(joined, so_str("opt/app/config.json"))) {
+            so_panic(so_cstr(so_string_add(so_str("unexpected path: "), joined)));
         }
-        mem_FreeString((mem_Allocator){0}, path);
+        mem_FreeString((mem_Allocator){0}, joined);
     }
     {
         // IsAbs.
         if (!path_IsAbs(so_str("/opt/app/config.json"))) {
-            so_panic("unexpectedly not absolute");
+            so_panic("want absolute");
         }
         if (path_IsAbs(so_str("opt/app/config.json"))) {
-            so_panic("unexpectedly absolute");
+            so_panic("want not absolute");
         }
     }
     {
@@ -60,6 +60,18 @@ int main(void) {
         so_String ext = path_Ext(so_str("/opt/app/config.json"));
         if (so_string_ne(ext, so_str(".json"))) {
             so_panic(so_cstr(so_string_add(so_str("unexpected ext: "), ext)));
+        }
+    }
+    {
+        // Match.
+        so_R_bool_err _res2 = path_Match(so_str("/opt/*/*.js?n"), so_str("/opt/app/config.json"));
+        bool ok = _res2.val;
+        so_Error err = _res2.err;
+        if (err != NULL) {
+            so_panic(err->msg);
+        }
+        if (!ok) {
+            so_panic("want match");
         }
     }
 }

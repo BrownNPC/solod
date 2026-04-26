@@ -19,6 +19,7 @@ Solod provides a growing set of high-level packages similar to Go's stdlib, and 
 [math/rand](#somathrand) •
 [mem](#somem) •
 [os](#soos) •
+[path](#sopath) •
 [runtime](#soruntime) •
 [slices](#soslices) •
 [strconv](#sostrconv) •
@@ -277,6 +278,19 @@ Types:
 - `FileInfo` describes a file (returned by `Stat` and `Lstat`).
 - `FileMode` represents a file's mode and permission bits.
 - `DirEntry` describes an entry in a directory (returned by `ReadDir`).
+
+## [so/path](https://pkg.go.dev/solod.dev/so/path)
+
+Utility routines for manipulating slash-separated paths. Based on Go's `path` package.
+
+- `Base` returns the last element of a path.
+- `Clean` returns the shortest equivalent path by lexical processing.
+- `Dir` returns all but the last element of a path.
+- `Ext` returns the file name extension used by a path.
+- `IsAbs` reports whether a path is absolute.
+- `Join` joins path elements into a single path.
+- `Match` reports whether a name matches a shell pattern.
+- `Split` splits a path into directory and file components.
 
 ## [so/runtime](https://pkg.go.dev/solod.dev/so/runtime)
 

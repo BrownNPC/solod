@@ -196,10 +196,10 @@ Supported platforms: amd64, arm64, and riscv64. 32-bit targets are not supported
 ⏳ Core stdlib packages (v0.1):
 
 ```text
-✓ bufio       ✓ fmt     ✓ os        ✓ strings
-✓ bytes       ✓ io      ✓ rand      ✓ strconv
-✗ filepath    ✓ maps    ✓ slices    ✓ time
-✓ flag        ✓ math    ✓ slog      ✓ unicode
+✓ bufio    ✓ io      ✗ path      ✓ strings
+✓ bytes    ✓ maps    ✓ rand      ✓ strconv
+✓ flag     ✓ math    ✓ slices    ✓ time
+✓ fmt      ✓ os      ✓ slog      ✓ unicode
 ```
 
 ⬜ Networking (v0.2).

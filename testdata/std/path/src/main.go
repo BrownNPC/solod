@@ -35,10 +35,10 @@ func main() {
 	{
 		// IsAbs.
 		if !path.IsAbs("/opt/app/config.json") {
-			panic("unexpectedly not absolute")
+			panic("want absolute")
 		}
 		if path.IsAbs("opt/app/config.json") {
-			panic("unexpectedly absolute")
+			panic("want not absolute")
 		}
 	}
 	{
@@ -61,6 +61,16 @@ func main() {
 		ext := path.Ext("/opt/app/config.json")
 		if ext != ".json" {
 			panic("unexpected ext: " + ext)
+		}
+	}
+	{
+		// Match.
+		ok, err := path.Match("/opt/*/*.js?n", "/opt/app/config.json")
+		if err != nil {
+			panic(err)
+		}
+		if !ok {
+			panic("want match")
 		}
 	}
 }
