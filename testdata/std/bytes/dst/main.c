@@ -236,7 +236,7 @@ int main(void) {
     }
     {
         // Buffer (heap-allocated).
-        bytes_Buffer buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){&so_Nil, 0, 0});
+        bytes_Buffer buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){0});
         bytes_Buffer_WriteString(&buf, so_str("hello"));
         bytes_Buffer_WriteString(&buf, so_str(" world"));
         if (so_string_ne(bytes_Buffer_String(&buf), so_str("hello world"))) {

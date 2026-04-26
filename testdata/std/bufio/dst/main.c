@@ -6,7 +6,7 @@ int main(void) {
     {
         // Writer -> Buffer -> Reader pipeline.
         bytes_Buffer buf = {0};
-        buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){&so_Nil, 0, 0});
+        buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){0});
         bufio_Writer w = bufio_NewWriter((mem_Allocator){0}, (io_Writer){.self = &buf, .Write = bytes_Buffer_Write});
         bufio_Writer_WriteString(&w, so_str("Hello, "));
         bufio_Writer_WriteString(&w, so_str("World!"));
@@ -65,7 +65,7 @@ int main(void) {
     {
         // WriteRune.
         bytes_Buffer buf = {0};
-        buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){&so_Nil, 0, 0});
+        buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){0});
         bufio_Writer w = bufio_NewWriter((mem_Allocator){0}, (io_Writer){.self = &buf, .Write = bytes_Buffer_Write});
         bufio_Writer_WriteRune(&w, U'A');
         bufio_Writer_Flush(&w);

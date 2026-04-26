@@ -195,29 +195,26 @@ typedef struct {
     so_int cap;
 } so_Slice;
 
-// Nil sentinel: address used as the pointer for nil/empty slices.
-// Non-NULL to satisfy static analyzers; never dereferenced.
-extern so_byte so_Nil[];
-
 // make_slice creates a zero-initialized slice on the stack.
 // Allocates memory on the stack until the calling function returns.
-#define so_make_slice(T, len, cap) ({        \
-    so_int _cap = (so_int)(cap);             \
-    size_t _n = sizeof(T) * (size_t)_cap;    \
-    void* _p = _n ? so_alloca(_n) : &so_Nil; \
-    if (_n) memset(_p, 0, _n);               \
-    (so_Slice){_p, (len), _cap};             \
+#define so_make_slice(T, len, cap) ({     \
+    so_int _cap = (so_int)(cap);          \
+    size_t _n = sizeof(T) * (size_t)_cap; \
+    void* _p = _n ? so_alloca(_n) : NULL; \
+    if (_n) memset(_p, 0, _n);            \
+    (so_Slice){_p, (len), _cap};          \
 })
 
 // slice creates a slice from another slice
 // from index 'from' (inclusive) to index 'to' (exclusive).
-#define so_slice(T, s, from, to) ({                              \
-    so_Slice _s = (s);                                           \
-    so_int _from = (so_int)(from);                               \
-    so_int _to = (so_int)(to);                                   \
-    assert((_to <= _s.cap && _from <= _to) &&                    \
-           "slice bounds out of range");                         \
-    (so_Slice){(T*)_s.ptr + _from, _to - _from, _s.cap - _from}; \
+#define so_slice(T, s, from, to) ({                       \
+    so_Slice _s = (s);                                    \
+    so_int _from = (so_int)(from);                        \
+    so_int _to = (so_int)(to);                            \
+    assert((_to <= _s.cap && _from <= _to) &&             \
+           "slice bounds out of range");                  \
+    T* _ptr = _s.ptr == NULL ? NULL : (T*)_s.ptr + _from; \
+    (so_Slice){_ptr, _to - _from, _s.cap - _from};        \
 })
 
 // slice3 creates a slice from another slice with an explicit capacity.
@@ -232,7 +229,7 @@ extern so_byte so_Nil[];
 })
 
 // decay extracts the pointer from a slice for passing to C functions.
-// Returns NULL for empty/nil slices instead of the so_Nil sentinel.
+// Returns NULL for empty/nil slices.
 #define so_decay(s) ({ so_Slice _s = (s); _s.cap ? _s.ptr : NULL; })
 
 // string_bytes reinterprets a string as a byte slice (zero-copy).
@@ -566,7 +563,7 @@ static inline void* unsafe_Add(void* ptr, size_t offset) {
 }
 static inline so_String unsafe_String(void* ptr, so_int len) {
     if (ptr == NULL) {
-        return (so_String){(char*)&so_Nil, 0};
+        return (so_String){0};
     }
     return (so_String){(char*)ptr, len};
 }
@@ -578,7 +575,7 @@ static inline so_byte* unsafe_StringData(so_String s) {
 }
 static inline so_Slice unsafe_Slice(void* ptr, so_int len) {
     if (ptr == NULL) {
-        return (so_Slice){&so_Nil, 0, 0};
+        return (so_Slice){0};
     }
     return (so_Slice){ptr, len, len};
 }

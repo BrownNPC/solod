@@ -106,11 +106,11 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 		}
 	}
 
-	// Slice nil comparisons: emit s.ptr == &so_Nil / != &so_Nil.
+	// Slice nil comparisons: emit s.ptr == NULL / != NULL.
 	if n.Op == token.EQL || n.Op == token.NEQ {
 		if _, ok := g.types.TypeOf(n.X).Underlying().(*types.Slice); ok && isNilType(g.types.TypeOf(n.Y)) {
 			g.emitExpr(n.X)
-			fmt.Fprintf(w, ".ptr %s &so_Nil", n.Op.String())
+			fmt.Fprintf(w, ".ptr %s NULL", n.Op.String())
 			return
 		}
 	}
@@ -538,9 +538,9 @@ func (g *Generator) emitExprAsType(node ast.Node, expr ast.Expr, targetType type
 			return
 		}
 	}
-	// Slice nil assignment: emit sentinel-initialized struct instead of NULL.
+	// Slice nil assignment: emit zero-initialized struct instead of NULL.
 	if _, ok := targetType.Underlying().(*types.Slice); ok && isNilType(g.types.TypeOf(expr)) {
-		fmt.Fprintf(g.state.writer, "(so_Slice){&so_Nil, 0, 0}")
+		fmt.Fprintf(g.state.writer, "(so_Slice){0}")
 		return
 	}
 	// Map nil assignment: emit NULL.

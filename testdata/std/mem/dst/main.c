@@ -116,7 +116,7 @@ static void allocTest(void) {
     }
     {
         // ReallocSlice from empty slice.
-        so_Slice empty = {&so_Nil, 0, 0};
+        so_Slice empty = {0};
         so_Slice slice = mem_ReallocSlice(so_int, ((mem_Allocator){0}), (empty), (3), (4));
         if (so_len(slice) != 3 || so_cap(slice) != 4) {
             so_panic("ReallocSlice empty: unexpected len/cap");
@@ -130,7 +130,7 @@ static void allocTest(void) {
         // Free with nil or an empty slice.
         main_Point* p = NULL;
         mem_Free(main_Point, ((mem_Allocator){0}), (p));
-        so_Slice empty = {&so_Nil, 0, 0};
+        so_Slice empty = {0};
         mem_FreeSlice(so_int, ((mem_Allocator){0}), (empty));
     }
     {

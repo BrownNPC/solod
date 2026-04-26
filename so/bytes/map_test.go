@@ -13,7 +13,7 @@ import (
 )
 
 var lowerTests = []StringTest{
-	{"", []byte("")},
+	{"", []byte(nil)},
 	{"abc", []byte("abc")},
 	{"AbC123", []byte("abc123")},
 	{"azAZ09_", []byte("azaz09_")},
@@ -28,7 +28,7 @@ func TestToLower(t *testing.T) {
 }
 
 var upperTests = []StringTest{
-	{"", []byte("")},
+	{"", []byte(nil)},
 	{"ONLYUPPER", []byte("ONLYUPPER")},
 	{"abc", []byte("ABC")},
 	{"AbC123", []byte("ABC123")},

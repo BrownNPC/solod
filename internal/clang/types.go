@@ -180,7 +180,7 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 
 	// Slices.
 	if _, ok := typ.Underlying().(*types.Slice); ok {
-		return "{&so_Nil, 0, 0}"
+		return "{0}"
 	}
 
 	// Maps.

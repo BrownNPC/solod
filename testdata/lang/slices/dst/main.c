@@ -127,14 +127,14 @@ int main(void) {
     }
     {
         // Slice literals.
-        so_Slice nils = (so_Slice){&so_Nil, 0, 0};
-        if (nils.ptr != &so_Nil) {
+        so_Slice nils = (so_Slice){0};
+        if (nils.ptr != NULL) {
             so_panic("want nils == nil");
         }
         if (so_len(nils) != 0) {
             so_panic("want len(nils) == 0");
         }
-        so_Slice empty = (so_Slice){&so_Nil, 0, 0};
+        so_Slice empty = (so_Slice){0};
         if (so_len(empty) != 0) {
             so_panic("want len(empty) == 0");
         }
@@ -501,18 +501,18 @@ int main(void) {
     }
     {
         // Nil slice: comparison.
-        so_Slice s = {&so_Nil, 0, 0};
-        if (s.ptr != &so_Nil) {
+        so_Slice s = {0};
+        if (s.ptr != NULL) {
             so_panic("want nil slice");
         }
         s = (so_Slice){(so_int[1]){1}, 1, 1};
-        if (s.ptr == &so_Nil) {
+        if (s.ptr == NULL) {
             so_panic("want non-nil slice");
         }
     }
     {
         // Nil slice: len and cap.
-        so_Slice s = {&so_Nil, 0, 0};
+        so_Slice s = {0};
         if (so_len(s) != 0) {
             so_panic("want nil len==0");
         }
