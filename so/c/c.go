@@ -58,6 +58,14 @@ func Bytes(ptr *byte, n int) []byte {
 	return unsafe.Slice(ptr, n)
 }
 
+// CString converts a So string to a null-terminated C string.
+// Allocates memory on the stack using alloca until the calling function returns.
+//
+//so:extern so_cstr
+func CString(s string) *Char {
+	return (*Char)(unsafe.StringData(s))
+}
+
 // PtrAdd adds offset bytes to a pointer and returns the result.
 //
 //	ptr + offset
