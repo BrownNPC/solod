@@ -29,9 +29,8 @@ static inline char* c_CharPtr(void* ptr) {
 #define c_Slice(T, ptr, len, cap) \
     (ptr ? (so_Slice){(ptr), (len), (cap)} : (so_Slice){0})
 
-static inline so_String c_String(void* ptr) {
-    char* s = (char*)(ptr);
-    return ptr ? (so_String){s, (so_int)strlen(s)} : (so_String){0};
+static inline so_String c_String(const char* s) {
+    return s ? (so_String){s, (so_int)strlen(s)} : (so_String){0};
 }
 
 #define c_Zero(T) ((T){0})

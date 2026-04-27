@@ -24,6 +24,7 @@ package fmt
 
 import (
 	"fmt" // for testing
+	"unsafe"
 
 	"solod.dev/so/c"
 	"solod.dev/so/errors"
@@ -53,7 +54,7 @@ var (
 //
 //so:extern
 type Buffer struct {
-	Ptr *byte
+	Ptr *c.Char
 	Len int
 }
 
@@ -63,7 +64,7 @@ type Buffer struct {
 func NewBuffer(size int) Buffer {
 	b := make([]byte, size)
 	return Buffer{
-		Ptr: &b[0],
+		Ptr: (*c.Char)(unsafe.SliceData(b)),
 		Len: size,
 	}
 }
@@ -71,8 +72,9 @@ func NewBuffer(size int) Buffer {
 // BufferFrom creates a Buffer that uses the provided byte slice as its storage.
 // The buffer doesn't take ownership of the slice and doesn't free it.
 func BufferFrom(buf []byte) Buffer {
+	ptr := unsafe.SliceData(buf)
 	return Buffer{
-		Ptr: &buf[0],
+		Ptr: (*c.Char)(ptr),
 		Len: len(buf),
 	}
 }

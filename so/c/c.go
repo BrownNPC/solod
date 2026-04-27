@@ -8,6 +8,11 @@ import "unsafe"
 //so:embed c.h
 var c_h string
 
+// Char represents a C char type.
+//
+//so:extern char
+type Char byte
+
 // Alignof returns the alignment of type T in bytes.
 //
 //	alignof(T)
@@ -51,16 +56,6 @@ func Bytes(ptr *byte, n int) []byte {
 		return nil
 	}
 	return unsafe.Slice(ptr, n)
-}
-
-// CharPtr casts a *byte (uint8_t*) to char* for C functions
-// that expect char* instead of uint8_t*.
-//
-//	(char*)ptr
-//
-//so:extern
-func CharPtr(ptr *byte) *byte {
-	return ptr
 }
 
 // PtrAdd adds offset bytes to a pointer and returns the result.
@@ -123,7 +118,7 @@ func Slice[T any](ptr *T, len int, cap int) []T {
 //	(so_String){s, strlen(s)}
 //
 //so:extern
-func String(ptr *byte) string { _ = ptr; return "" }
+func String(ptr *Char) string { _ = ptr; return "" }
 
 // Zero returns the zero value of type T.
 //

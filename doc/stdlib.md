@@ -78,13 +78,18 @@ Types:
 
 Low-level C interop helpers for pointers, strings, and type information.
 
+Functions:
+
 - `Alignof` and `Sizeof` return the alignment and size of type T.
 - `Alloca` allocates an array on the stack.
 - `Assert` aborts with a message if a condition is false.
 - `Bytes`, `Slice` and `String` wrap C pointers to So types.
-- `CharPtr` - cast a `*byte` to `char*`.
 - `PtrAdd`, `PtrAs` and `PtrAt` manipulate pointers.
 - `Zero` returns the zero value of type T.
+
+Types:
+
+- `Char` represents a C `char` type.
 
 ## [so/cmp](https://pkg.go.dev/solod.dev/so/cmp)
 

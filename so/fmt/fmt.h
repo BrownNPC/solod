@@ -12,7 +12,7 @@ extern so_Error fmt_ErrSize;   // buffer size exceeded
 // Buffer is a fixed-size stack-allocated buffer
 // for formatted output and scanning.
 typedef struct {
-    so_byte* Ptr;
+    char* Ptr;
     so_int Len;
 } fmt_Buffer;
 

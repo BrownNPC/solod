@@ -57,7 +57,7 @@ func Getwd(buf []byte) (string, error) {
 	if bufPtr == nil {
 		panic("os: empty buffer")
 	}
-	cwd := getcwd(c.CharPtr(bufPtr), uintptr(len(buf))).(*byte)
+	cwd := getcwd((*c.Char)(bufPtr), uintptr(len(buf)))
 	if cwd == nil {
 		return "", mapError()
 	}
@@ -69,11 +69,11 @@ func Getwd(buf []byte) (string, error) {
 // Writes the result into buf. Panics if buf is empty.
 // The returned string is a view into buf.
 func Hostname(buf []byte) (string, error) {
-	name := unsafe.SliceData(buf)
+	name := (*c.Char)(unsafe.SliceData(buf))
 	if name == nil {
 		panic("os: empty buffer")
 	}
-	if gethostname(c.CharPtr(name), uintptr(len(buf))) != 0 {
+	if gethostname(name, uintptr(len(buf))) != 0 {
 		return "", mapError()
 	}
 	return c.String(name), nil

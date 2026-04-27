@@ -110,7 +110,7 @@ func Readlink(buf []byte, name string) (string, error) {
 	if bufPtr == nil {
 		panic("os: empty buffer")
 	}
-	n := readlink(name, c.CharPtr(bufPtr), uintptr(len(buf)))
+	n := readlink(name, (*c.Char)(bufPtr), uintptr(len(buf)))
 	if n < 0 {
 		return "", mapError()
 	}

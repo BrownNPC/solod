@@ -44,14 +44,15 @@ func readDir(a mem.Allocator, name string) ([]DirEntry, error) {
 
 	entries := slices.MakeCap[DirEntry](a, 0, 16)
 	var nameBuf [MaxNameLen]byte
+	cname := (*c.Char)(&nameBuf[0])
 
 	for {
-		r := os_readdir_next(dir, c.CharPtr(&nameBuf[0]), MaxNameLen)
+		r := os_readdir_next(dir, cname, MaxNameLen)
 		if !r.ok {
 			break
 		}
 
-		entryName := unsafe.String(&nameBuf[0], int(r.nameLen))
+		entryName := unsafe.String((*byte)(cname), int(r.nameLen))
 
 		// Skip "." and "..".
 		if entryName == "." || entryName == ".." {
