@@ -30,6 +30,9 @@ func (g *Generator) emitImports(w io.Writer) {
 		}
 	}
 	slices.Sort(paths)
+	for _, inc := range g.includes {
+		fmt.Fprintf(w, "#include %s\n", inc)
+	}
 	for _, p := range paths {
 		fmt.Fprintf(w, "#include \"%s\"\n", p)
 	}

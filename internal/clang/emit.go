@@ -114,9 +114,6 @@ func (g *Generator) emitImpl(w io.Writer) {
 	g.state.writer = w
 
 	fmt.Fprintf(w, "#include \"%s.h\"\n", g.pkg.Name)
-	for _, inc := range g.includes {
-		fmt.Fprintf(w, "#include %s\n", inc)
-	}
 
 	g.emitEmbeds(w, g.embeds.impl)
 	g.emitUnexportedTypes(w)
