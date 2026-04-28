@@ -2,10 +2,7 @@ package os
 
 import "solod.dev/so/c"
 
-//so:include <errno.h>
-
-//so:embed os.h
-var os_h string
+//so:include.c <errno.h>
 
 //so:embed os.c
 var os_c string

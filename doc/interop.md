@@ -12,10 +12,16 @@ So provides several tools for easy C interop.
 
 ## Includes
 
-Include a C header file:
+Include a C header file. By default, `so:include` emits in the `.h` file, making the header visible to consumers:
 
 ```go
-//so:include "person.ext.h"
+//so:include <stdint.h>
+```
+
+Use `so:include.c` when the include is purely an implementation detail that should only appear in the `.c` file:
+
+```go
+//so:include.c "internal_helper.h"
 ```
 
 ## Extern declarations

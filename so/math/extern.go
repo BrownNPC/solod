@@ -3,10 +3,10 @@ package math
 
 import "math" // for testing
 
-//so:include <float.h>
-//so:include <limits.h>
-//so:include <math.h>
-//so:include <stdint.h>
+//so:include.c <float.h>
+//so:include.c <limits.h>
+//so:include.c <math.h>
+//so:include.c <stdint.h>
 
 // Floating-point limit values.
 // Max is the largest finite value representable by the type.

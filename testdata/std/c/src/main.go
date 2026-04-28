@@ -3,9 +3,13 @@ package main
 import "solod.dev/so/c"
 
 //so:include <math.h>
+//so:include.c <ctype.h>
 
 //so:embed main.h
 var main_h string
+
+//so:extern
+func isalpha(ch int32) bool
 
 //so:extern
 func get_cstring(s string) *c.ConstChar
@@ -17,6 +21,12 @@ func main() {
 		str := c.String(cstr)
 		if str != "Hello, C!" {
 			panic("unexpected string: " + str)
+		}
+	}
+	{
+		// Use header included via so:include.c
+		if !isalpha('a') {
+			panic("isalpha failed")
 		}
 	}
 	{

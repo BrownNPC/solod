@@ -118,8 +118,10 @@ func (g *Generator) collectExterns() {
 		// Collect include directives from the file.
 		for _, cg := range file.Comments {
 			for _, c := range cg.List {
-				if include, ok := strings.CutPrefix(c.Text, "//so:include"); ok {
-					g.includes = append(g.includes, strings.TrimSpace(include))
+				if path, ok := strings.CutPrefix(c.Text, "//so:include.c"); ok {
+					g.includes.impl = append(g.includes.impl, strings.TrimSpace(path))
+				} else if path, ok := strings.CutPrefix(c.Text, "//so:include"); ok {
+					g.includes.header = append(g.includes.header, strings.TrimSpace(path))
 				}
 			}
 		}

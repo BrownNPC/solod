@@ -1,5 +1,6 @@
 #pragma once
 #include "so/builtin/builtin.h"
+#include <math.h>
 #include "so/c/c.h"
 
 // -- Embeds --

@@ -4,7 +4,7 @@
 
 package bytealg
 
-//so:include <string.h>
+//so:include.c <string.h>
 
 // Equal reports whether a and b
 // are the same length and contain the same bytes.

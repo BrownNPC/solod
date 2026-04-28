@@ -1,5 +1,5 @@
 #include "main.h"
-#include <math.h>
+#include <ctype.h>
 
 // -- Variables and constants --
 
@@ -12,6 +12,12 @@ int main(void) {
         so_String str = c_String(so_const_char, (cstr));
         if (so_string_ne(str, so_str("Hello, C!"))) {
             so_panic(so_cstr(so_string_add(so_str("unexpected string: "), str)));
+        }
+    }
+    {
+        // Use header included via so:include.c
+        if (!isalpha(U'a')) {
+            so_panic("isalpha failed");
         }
     }
     {

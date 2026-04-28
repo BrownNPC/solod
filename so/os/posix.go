@@ -4,8 +4,8 @@ import "solod.dev/so/c"
 
 //so:include <dirent.h>
 //so:include <fcntl.h>
-//so:include <sys/stat.h>
-//so:include <unistd.h>
+//so:include.c <sys/stat.h>
+//so:include.c <unistd.h>
 
 // MaxPathLen is the maximum length of a path.
 const MaxPathLen = 4096
