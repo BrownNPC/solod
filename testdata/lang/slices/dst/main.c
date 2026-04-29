@@ -5,6 +5,8 @@ static so_R_i64_err lenInt64(so_Slice buf);
 static so_R_i64_err lenInt64Impl(so_Slice buf);
 static so_int sumSlice(so_Slice s);
 static void modifySlice(so_Slice s);
+static void acceptSlice(so_Slice s);
+static so_Slice nilSlice(void);
 static so_int sumVariadic(so_Slice nums);
 static so_int main_SliceHolder_sum(main_SliceHolder h);
 static so_int main_SliceHolder_get(main_SliceHolder h, so_int i);
@@ -33,6 +35,14 @@ static so_int sumSlice(so_Slice s) {
 static void modifySlice(so_Slice s) {
     so_at(so_int, s, 0) = 99;
     so_at(so_int, s, 1) = 88;
+}
+
+static void acceptSlice(so_Slice s) {
+    (void)s;
+}
+
+static so_Slice nilSlice(void) {
+    return (so_Slice){0};
 }
 
 static so_int sumVariadic(so_Slice nums) {
@@ -518,6 +528,17 @@ int main(void) {
         }
         if (so_cap(s) != 0) {
             so_panic("want nil cap==0");
+        }
+    }
+    {
+        // Nil slice: pass to function.
+        acceptSlice((so_Slice){0});
+    }
+    {
+        // Nil slice: return from function.
+        so_Slice s = nilSlice();
+        if (s.ptr != NULL) {
+            so_panic("want nil from function");
         }
     }
     {

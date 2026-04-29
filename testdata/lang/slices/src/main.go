@@ -27,6 +27,14 @@ func modifySlice(s []int) {
 	s[1] = 88
 }
 
+func acceptSlice(s []int) {
+	_ = s
+}
+
+func nilSlice() []int {
+	return nil
+}
+
 func sumVariadic(nums ...int) int {
 	total := 0
 	for _, n := range nums {
@@ -531,6 +539,17 @@ func main() {
 		}
 		if cap(s) != 0 {
 			panic("want nil cap==0")
+		}
+	}
+	{
+		// Nil slice: pass to function.
+		acceptSlice(nil)
+	}
+	{
+		// Nil slice: return from function.
+		s := nilSlice()
+		if s != nil {
+			panic("want nil from function")
 		}
 	}
 	{
