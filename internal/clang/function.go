@@ -378,8 +378,9 @@ func (g *Generator) emitCArg(arg ast.Expr) {
 		g.emitExpr(arg)
 		fmt.Fprintf(w, ")")
 	} else if isErrorType(g.types.TypeOf(arg)) {
+		fmt.Fprintf(w, "errors_cstr(")
 		g.emitExpr(arg)
-		fmt.Fprintf(w, "->msg")
+		fmt.Fprintf(w, ")")
 	} else {
 		g.emitExpr(arg)
 	}

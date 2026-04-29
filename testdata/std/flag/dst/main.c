@@ -14,7 +14,7 @@ int main(void) {
     flag_FlagSet_StringVar(&flags, &s, so_str("s"), so_str("default"), so_str("a string flag"));
     so_Error err = flag_FlagSet_Parse(&flags, (so_Slice){(so_String[7]){so_str("-b"), so_str("-n"), so_str("42"), so_str("-f"), so_str("3.14"), so_str("-s"), so_str("hello")}, 7, 7});
     if (err != NULL) {
-        so_panic(err->msg);
+        so_panic(errors_cstr(err));
     }
     if (!b) {
         so_panic("b != true");

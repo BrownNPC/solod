@@ -389,6 +389,11 @@ typedef struct so_Error_* so_Error;
 // so_Error errors_New(const char* s)
 #define errors_New(s) (&(struct so_Error_){s})
 
+// errors_cstr returns the error message C string, or "<nil>" for no error.
+static inline const char* errors_cstr(so_Error err) {
+    return err ? err->msg : "<nil>";
+}
+
 // panic aborts the program with the given message.
 #define so_panic(msg)                                     \
     do {                                                  \

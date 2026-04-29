@@ -68,7 +68,7 @@ int main(void) {
         bool ok = _res2.val;
         so_Error err = _res2.err;
         if (err != NULL) {
-            so_panic(err->msg);
+            so_panic(errors_cstr(err));
         }
         if (!ok) {
             so_panic("want match");

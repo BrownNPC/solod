@@ -75,6 +75,8 @@ int main(void) {
     {
         // Printing errors.
         so_Error err = makeTea(42);
-        so_println("%s %s", "err =", err->msg);
+        so_println("%s %s", "err =", errors_cstr(err));
+        so_Error nilErr = NULL;
+        so_println("%s %s", "err =", errors_cstr(nilErr));
     }
 }

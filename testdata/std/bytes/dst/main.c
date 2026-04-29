@@ -269,7 +269,7 @@ int main(void) {
         so_Slice b = _res3.val;
         so_Error err = _res3.err;
         if (err != NULL) {
-            so_panic(err->msg);
+            so_panic(errors_cstr(err));
         }
         if (so_string_ne(so_bytes_string(b), s)) {
             so_panic("Reader Read failed");
