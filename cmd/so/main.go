@@ -111,9 +111,11 @@ func run(args []string) error {
 	}
 
 	pkg := "."
+	var runArgs []string
 	if flags.NArg() > 0 {
 		pkg = flags.Arg(0)
+		runArgs = flags.Args()[1:]
 	}
 
-	return compiler.Run(pkg)
+	return compiler.Run(pkg, runArgs)
 }
