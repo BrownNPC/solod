@@ -32,7 +32,7 @@ func Build(srcDir, outFile string) error {
 
 // Run translates and compiles the Go package in srcDir, then executes it.
 // Returns an *exec.ExitError if the program exits with a non-zero status.
-func Run(srcDir string) error {
+func Run(srcDir string, args []string) error {
 	tmpFile, err := os.CreateTemp("", "solod_run")
 	if err != nil {
 		return fmt.Errorf("create temp file: %w", err)
@@ -44,7 +44,7 @@ func Run(srcDir string) error {
 		return err
 	}
 
-	cmd := exec.Command(tmpFile.Name())
+	cmd := exec.Command(tmpFile.Name(), args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
