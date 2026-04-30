@@ -3,11 +3,7 @@
 // functions without a body.
 package main
 
-import (
-	_ "embed"
-
-	"solod.dev/so/c"
-)
+import "solod.dev/so/c"
 
 // The include directive tell So to #include
 // the given headers into the generated C code.
@@ -16,7 +12,7 @@ import (
 
 // Declare C functions to make them callable from So.
 // String arguments auto-decay to C's `char*`.
-func getenv(name string) *byte
+func getenv(name string) *c.Char
 func atoi(s string) int32
 
 // Scalar types like int32 map directly to C's int.
@@ -49,7 +45,7 @@ type tm struct{}
 func localtime(timer *time_t) *tm
 
 // `strftime` formats a time value into a string.
-func strftime(buf *byte, maxsize int, format string, timeptr *tm) int
+func strftime(buf *c.Char, maxsize int, format string, timeptr *tm) int
 
 // `difftime` computes the difference between two times.
 func difftime(end, start time_t) float64
@@ -77,8 +73,9 @@ func main() {
 	// `strftime` writes the formatted time into a buffer.
 	local := localtime(&now)
 	var buf [64]byte
-	strftime(c.CharPtr(&buf[0]), 64, "%Y-%m-%d %H:%M:%S", local)
-	println("current time:", c.String(&buf[0]))
+	cptr := (*c.Char)(&buf[0])
+	strftime(cptr, 64, "%Y-%m-%d %H:%M:%S", local)
+	println("current time:", c.String(cptr))
 
 	// Compute the difference between two times.
 	start := now

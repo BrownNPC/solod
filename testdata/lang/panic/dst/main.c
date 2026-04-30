@@ -21,7 +21,7 @@ static void panicString(void) {
 
 static void panicError(void) {
     so_Error err = main_ErrNotFound;
-    so_panic(err->msg);
+    so_panic(errors_cstr(err));
 }
 
 int main(void) {

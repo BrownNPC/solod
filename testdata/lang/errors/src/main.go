@@ -71,6 +71,8 @@ func main() {
 		// Printing errors.
 		err := makeTea(42)
 		println("err =", err)
+		var nilErr error
+		println("err =", nilErr)
 	}
 
 	// Not supported: errors can only be defined at package level.

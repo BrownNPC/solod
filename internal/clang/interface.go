@@ -13,7 +13,7 @@ import (
 func (g *Generator) emitInterfaceTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 	typ := g.types.Defs[spec.Name].Type().(*types.Named)
 	iface := typ.Underlying().(*types.Interface)
-	cName := g.declSymbolName(spec.Name.Name)
+	cName := g.declSymbolName(g.types.Defs[spec.Name])
 	fmt.Fprintf(w, "typedef struct %s {\n", cName)
 	fmt.Fprintf(w, "    void* self;\n")
 	for m := range iface.Methods() {

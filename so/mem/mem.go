@@ -16,9 +16,6 @@ var mem_h string
 // fails due to insufficient memory.
 var ErrOutOfMemory = errors.New("out of memory")
 
-//so:extern so_Nil
-var Nil byte
-
 // Alloc allocates a single value of type T using allocator a.
 // Returns a pointer to the allocated memory or panics on failure.
 // Whether new memory is zeroed depends on the allocator.
@@ -95,8 +92,6 @@ func TryAllocSlice[T any](a Allocator, len int, cap int) ([]T, error) {
 	var _err error
 	if _cap > 0 {
 		_ptr, _err = _a.Alloc(_esize*_cap, _align)
-	} else {
-		_ptr = &Nil
 	}
 
 	var _ts []T
@@ -146,7 +141,6 @@ func TryReallocSlice[T any](a Allocator, slice []T, newLen int, newCap int) ([]T
 		if _oldCap > 0 {
 			_a.Free(unsafe.SliceData(slice), _esize*_oldCap, _align)
 		}
-		_newPtr = &Nil
 	} else if _oldCap == 0 {
 		_newPtr, _err = _a.Alloc(_esize*_newCap, _align)
 	} else {

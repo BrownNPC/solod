@@ -25,4 +25,13 @@ int main(void) {
     sum3Fn fn3 = sum3;
     so_int s3 = fn3(3, 3, 3);
     (void)s3;
+    // Function literals (anonymous functions) are not supported.
+    // fn4 := func(a, b, c int) int {
+    // 	return a * b * c
+    // }
+    // s4 := fn4(2, 3, 4)
+    // _ = s4
+    main_Sum3Fn fn5 = sub_Sum;
+    so_int s5 = fn5(10, 20, 30);
+    (void)s5;
 }

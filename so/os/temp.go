@@ -20,11 +20,11 @@ import (
 // The name in the returned File is a view into buf.
 func CreateTemp(buf []byte, dir, pattern string) (File, error) {
 	tmpl := buildTempTemplate(buf[:0], dir, pattern)
-	tmplPtr := unsafe.SliceData(tmpl)
+	tmplPtr := (*c.Char)(unsafe.SliceData(tmpl))
 	if tmplPtr == nil {
 		panic("os: empty buffer")
 	}
-	fd := mkstemp(c.CharPtr(tmplPtr))
+	fd := mkstemp(tmplPtr)
 	if fd < 0 {
 		return File{}, mapError()
 	}
@@ -50,11 +50,11 @@ func CreateTemp(buf []byte, dir, pattern string) (File, error) {
 // The returned string is a view into buf.
 func MkdirTemp(buf []byte, dir, pattern string) (string, error) {
 	tmpl := buildTempTemplate(buf[:0], dir, pattern)
-	tmplPtr := unsafe.SliceData(tmpl)
+	tmplPtr := (*c.Char)(unsafe.SliceData(tmpl))
 	if tmplPtr == nil {
 		panic("os: empty buffer")
 	}
-	result := mkdtemp(c.CharPtr(tmplPtr)).(*byte)
+	result := mkdtemp(tmplPtr)
 	if result == nil {
 		return "", mapError()
 	}

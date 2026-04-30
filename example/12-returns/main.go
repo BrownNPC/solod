@@ -14,10 +14,12 @@ func main() {
 	// call with _multiple assignment_.
 	v, err := vals()
 	println("v =", v)
-	println("err =", err)
+	if err != nil {
+		panic(err)
+	}
 
 	// If you only want a subset of the returned values,
 	// use the blank identifier `_`.
-	_, err = vals()
-	println("err =", err)
+	v, _ = vals()
+	println("v =", v)
 }

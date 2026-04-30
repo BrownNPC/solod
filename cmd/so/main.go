@@ -62,7 +62,7 @@ Run 'so <command> -h' for details.
 
 func translate(args []string) error {
 	flags := flag.NewFlagSet("translate", flag.ContinueOnError)
-	outDir := flags.String("o", "", "output directory (default: package directory)")
+	outDir := flags.String("o", "", "output directory (default: current directory)")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func translate(args []string) error {
 
 	out := *outDir
 	if out == "" {
-		out = pkg
+		out = "."
 	}
 
 	return compiler.Translate(pkg, out)

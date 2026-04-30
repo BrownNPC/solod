@@ -733,6 +733,8 @@ func (s HttpStatus) String() string {
 }
 ```
 
+Method expressions (`T.method` or `(*T).method`) are supported. Method values (`v.method`) are not supported.
+
 ## Interfaces
 
 Interfaces in So are like Go interfaces, but they don't include runtime type information.
@@ -917,107 +919,11 @@ Defer is not supported inside other scopes like `for` or `if`.
 
 ## C interop
 
-Include a C header file:
-
-```go
-//so:include "person.ext.h"
-```
-
-Declare an external C type (excluded from emission) with `so:extern`:
-
-```go
-//so:extern
-type Account struct {
-    name    string
-    balance int64
-    flags   []uint8
-}
-```
-
-Declare an external C function:
-
-```go
-//so:extern
-func dec_balance(acc *Account, amount int64) int64 {
-    return 42 // for testing
-}
-```
-
-When calling extern functions, `string` and `[]T` arguments are automatically decayed to their C equivalents: string literals become raw C strings (`"hello"`), string values become `char*` (`.ptr`), and slices become raw pointers (`.ptr`). This means C macros don't need to extract `.ptr` themselves:
-
-```go
-//so:extern
-func fopen(path string, mode string) *File { return nil }
-
-// Go call:
-f := fopen("/tmp/test.txt", "w")
-
-// Generated C:
-// fopen("/tmp/test.txt", "w")
-// not fopen(so_str("/tmp/test.txt"), so_str("w"))
-```
-
-The `so:extern` directive supports two optional parameters: a C name override and the `nodecay` flag.
-
-_Name override_ specifies the C name to use instead of the default package-prefixed name. Useful for extern types that must match a C header:
-
-```go
-//so:extern Account
-type Account struct {
-    name    string
-    balance int64
-}
-// Uses "Account" in C instead of "main_Account"
-```
-
-_Nodecay_ skips the automatic decay of So types (`so_String`, `so_Slice`) to raw C types. Use this for C functions that are "So-aware" and accept So types directly:
-
-```go
-//so:extern nodecay
-func set_name(acc *Account, name string)
-
-// Generated C passes so_String directly:
-// set_name(&acc, name)
-// not set_name(&acc, so_cstr(name))
-```
-
-Both options can be combined:
-
-```go
-//so:extern MyFunc nodecay
-func MyFunc(s string)
-```
-
-The `so/c` package includes helpers for converting C pointers back to So string and slice types: `c.String(ptr)` and `c.Bytes(ptr, n)`. It also provides `c.CharPtr(ptr)` to cast a `*byte` (`uint8_t*`) to `char*` for C functions that expect `char*` (e.g. `strftime`).
-
-Force a function to be emitted as `static inline` in the header file using `//so:inline`. This is useful for small, frequently used functions when the compiler won't inline them automatically:
-
-```go
-//so:inline
-func add(a, b int) int {
-    return a + b
-}
-```
-
-The function body is emitted directly in the `.h` file and skipped from the `.c` file. Works with both functions and methods.
+So provides several tools for easy C interop. They are explained in a [separate document](./interop.md).
 
 ## Generics
 
 So supports two forms of generic functions: extern declarations and inline macros. Both are very limited and usually not needed. They are explained in a [separate document](./generics.md).
-
-## Embeds
-
-Embed C files directly into the generated output using `//so:embed`:
-
-```go
-//so:embed main.h
-var main_h string
-
-//so:embed main.c
-var main_c string
-```
-
-`.h` files are embedded into the generated header, `.c` files into the generated implementation. The embed variable declarations are not emitted as C variables - they serve as markers only.
 
 ## Packages
 

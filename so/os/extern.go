@@ -1,9 +1,8 @@
 package os
 
-//so:include <errno.h>
+import "solod.dev/so/c"
 
-//so:embed os.h
-var os_h string
+//so:include.c <errno.h>
 
 //so:embed os.c
 var os_c string
@@ -108,13 +107,13 @@ func rename(oldpath string, newpath string) int {
 	return 0
 }
 
-// char *getenv(const char *name);
+// char* getenv(const char *name);
 //
 //so:extern
-func getenv(name string) any {
+func getenv(name string) *c.Char {
 	_ = name
 	b := []byte("getenv:" + name)
-	return &b[0]
+	return (*c.Char)(&b[0])
 }
 
 // void exit(int exit_code);

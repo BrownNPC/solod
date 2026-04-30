@@ -1,6 +1,6 @@
 package time
 
-import _ "embed"
+import "solod.dev/so/c"
 
 //so:embed time.h
 var time_h string
@@ -21,7 +21,7 @@ type time_tm struct {
 // size_t strftime(char* str, size_t count, const char* format, const struct tm* tp);
 //
 //so:extern
-func strftime(buf *byte, count uintptr, format string, tm *time_tm) uintptr {
+func strftime(buf *c.Char, count uintptr, format string, tm *time_tm) uintptr {
 	_, _, _, _ = buf, count, format, tm
 	return 0
 }
@@ -29,7 +29,7 @@ func strftime(buf *byte, count uintptr, format string, tm *time_tm) uintptr {
 // char* strptime(const char* s, const char* format, struct tm* tm);
 //
 //so:extern
-func strptime(value string, format string, tm *time_tm) any {
+func strptime(value string, format string, tm *time_tm) *c.Char {
 	_, _, _ = value, format, tm
 	return nil
 }

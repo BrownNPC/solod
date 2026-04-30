@@ -32,8 +32,7 @@ func shapeIsRect(s Shape) bool {
 }
 
 func shapeAsRect(s Shape) *Rect {
-	_, ok := s.(*Rect)
-	if !ok {
+	if _, ok := s.(*Rect); !ok {
 		return nil
 	}
 	r := s.(*Rect)

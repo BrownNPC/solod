@@ -2,7 +2,7 @@
 // a more powerful interface to sequences than arrays.
 package main
 
-import "solod.dev/so/c/stdio"
+import "solod.dev/so/fmt"
 
 func main() {
 	// Unlike arrays, slices are typed only by the
@@ -78,16 +78,16 @@ func main() {
 
 func printSlice(msg string, s []string) {
 	if len(s) == 0 {
-		stdio.Printf("%s []\n", msg)
+		fmt.Printf("%s []\n", msg)
 		return
 	}
-	stdio.Printf("%s", msg)
-	stdio.Printf(" [")
+	fmt.Printf("%s", msg)
+	fmt.Printf(" [")
 	for i, v := range s {
-		stdio.Printf("%s", v)
+		fmt.Printf("%s", v)
 		if i < len(s)-1 {
-			stdio.Printf(" ")
+			fmt.Printf(" ")
 		}
 	}
-	stdio.Printf("]\n")
+	fmt.Printf("]\n")
 }

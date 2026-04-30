@@ -50,6 +50,7 @@ func (g *Generator) emitHeaderDecls(w io.Writer) {
 	if len(typeSyms) > 0 {
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "// -- Types --")
+		g.emitForwardTypeDecls(w, typeSyms)
 		for _, sym := range typeSyms {
 			// The CommentMap might attach the doc comment to either decl
 			// or type spec, depending on whether it's a standalone or
@@ -134,7 +135,7 @@ func (g *Generator) emitHeaderGenDecl(w io.Writer, decl *ast.GenDecl) {
 			}
 			typ := g.types.Defs[name].Type()
 			ct := g.mapCType(spec, typ)
-			cName := g.symbolName(name.Name)
+			cName := g.symbolName(g.types.Defs[name])
 			switch decl.Tok {
 			case token.CONST:
 				fmt.Fprintf(w, "extern const %s;\n", ct.Decl(cName))

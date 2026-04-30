@@ -8,6 +8,16 @@ import "unsafe"
 //so:embed c.h
 var c_h string
 
+// Char represents a C char type.
+//
+//so:extern char
+type Char byte
+
+// ConstChar represents a C char type with a const modifier.
+//
+//so:extern so_const_char
+type ConstChar byte
+
 // Alignof returns the alignment of type T in bytes.
 //
 //	alignof(T)
@@ -53,14 +63,12 @@ func Bytes(ptr *byte, n int) []byte {
 	return unsafe.Slice(ptr, n)
 }
 
-// CharPtr casts a *byte (uint8_t*) to char* for C functions
-// that expect char* instead of uint8_t*.
+// CString converts a So string to a null-terminated C string.
+// Allocates memory on the stack using alloca until the calling function returns.
 //
-//	(char*)ptr
-//
-//so:extern
-func CharPtr(ptr *byte) *byte {
-	return ptr
+//so:extern so_cstr
+func CString(s string) *Char {
+	return (*Char)(unsafe.StringData(s))
 }
 
 // PtrAdd adds offset bytes to a pointer and returns the result.
@@ -93,6 +101,11 @@ func PtrAt[T any](ptr *T, index int) *T {
 	return PtrAdd(ptr, index*Sizeof[T]())
 }
 
+// Raw emits a raw block of C code.
+//
+//so:extern
+func Raw(code string) { _ = code }
+
 // Sizeof returns the size of type T in bytes.
 //
 //	sizeof(T)
@@ -123,7 +136,16 @@ func Slice[T any](ptr *T, len int, cap int) []T {
 //	(so_String){s, strlen(s)}
 //
 //so:extern
-func String(ptr *byte) string { _ = ptr; return "" }
+func String[T Char|ConstChar](ptr *T) string { _ = ptr; return "" }
+
+// Val emits a typed C expression.
+//
+//so:extern
+func Val[T any](expr string) T {
+	var v T
+	_ = expr
+	return v
+}
 
 // Zero returns the zero value of type T.
 //

@@ -1,6 +1,7 @@
 #include "main.h"
 
 // -- Forward declarations --
+static void argsTest(void);
 static void basicTest(void);
 static void dirTest(void);
 static void envTest(void);
@@ -9,6 +10,19 @@ static void procTest(void);
 static void seekTest(void);
 static void statTest(void);
 static void tempTest(void);
+
+// -- args.go --
+
+static void argsTest(void) {
+    // os.Args should be populated.
+    if (so_len(os_Args) == 0) {
+        so_panic("os.Args: empty");
+    }
+    // First arg (program name) should be non-empty.
+    if (so_len(so_at(so_String, os_Args, 0)) == 0 || so_string_eq(so_at(so_String, os_Args, 0), so_str(""))) {
+        so_panic("os.Args[0]: empty");
+    }
+}
 
 // -- basic.go --
 
@@ -633,7 +647,10 @@ static void fileTest(void) {
 
 // -- main.go --
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    so_String _so_argv[argc];
+    so_args_init(argc, argv, _so_argv);
+    argsTest();
     basicTest();
     dirTest();
     envTest();

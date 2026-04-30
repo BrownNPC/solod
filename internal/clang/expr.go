@@ -106,11 +106,11 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 		}
 	}
 
-	// Slice nil comparisons: emit s.ptr == &so_Nil / != &so_Nil.
+	// Slice nil comparisons: emit s.ptr == NULL / != NULL.
 	if n.Op == token.EQL || n.Op == token.NEQ {
 		if _, ok := g.types.TypeOf(n.X).Underlying().(*types.Slice); ok && isNilType(g.types.TypeOf(n.Y)) {
 			g.emitExpr(n.X)
-			fmt.Fprintf(w, ".ptr %s &so_Nil", n.Op.String())
+			fmt.Fprintf(w, ".ptr %s NULL", n.Op.String())
 			return
 		}
 	}
@@ -191,6 +191,12 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 // emitCallExpr emits a function call or type conversion.
 func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 	w := g.state.writer
+
+	// c.Val intrinsic: emit the string literal as a raw C expression.
+	if raw, ok := g.cIntrinsic(n); ok {
+		fmt.Fprintf(w, "%s", raw)
+		return
+	}
 
 	// Generic function call with explicit type argument (e.g. fn[T](a) or pkg.Fn[T](a)).
 	if indexExpr, ok := n.Fun.(*ast.IndexExpr); ok {
@@ -374,7 +380,7 @@ func (g *Generator) emitIdent(n *ast.Ident) {
 			// Package-level declarations: exported names are prefixed
 			// with the package name (e.g. RectArea -> geom_RectArea),
 			// and extern overrides are applied (e.g. maxInt64 -> INT64_MAX).
-			name = g.symbolName(name)
+			name = g.symbolName(obj)
 		}
 	}
 	if g.state.macroParams[name] {
@@ -401,7 +407,7 @@ func (g *Generator) emitSelectorExpr(n *ast.SelectorExpr) {
 		if pkgName, ok := g.types.Uses[ident].(*types.PkgName); ok {
 			// Use the extern C name if the symbol has one
 			// (e.g. math.MaxInt64 → INT64_MAX).
-			if info, ok := g.getExtern(pkgName.Name(), n.Sel.Name); ok && info.name != "" {
+			if info, ok := g.getExtern(g.types.Uses[n.Sel]); ok && info.name != "" {
 				fmt.Fprintf(g.state.writer, "%s", info.name)
 				return
 			}
@@ -410,6 +416,30 @@ func (g *Generator) emitSelectorExpr(n *ast.SelectorExpr) {
 			fmt.Fprintf(g.state.writer, "%s_%s", pkgName.Name(), n.Sel.Name)
 			return
 		}
+	}
+
+	// Method expression: T.method or (*T).method -> function name.
+	if selection, ok := g.types.Selections[n]; ok && selection.Kind() == types.MethodExpr {
+		// Get the named type (strip pointer if present).
+		recv := selection.Recv()
+		var named *types.Named
+		if ptr, ok := recv.(*types.Pointer); ok {
+			named = ptr.Elem().(*types.Named)
+		} else {
+			named = recv.(*types.Named)
+		}
+		cName := g.mapType(n, named) + "_" + n.Sel.Name
+
+		// Pointer receiver methods use void* in C, but the function type expects T*.
+		// Cast to match the function pointer type.
+		declSig := selection.Obj().Type().(*types.Signature)
+		if _, isPtrRecv := declSig.Recv().Type().(*types.Pointer); isPtrRecv {
+			cTypeName := g.mapType(n, g.types.TypeOf(n))
+			fmt.Fprintf(g.state.writer, "(%s)%s", cTypeName, cName)
+		} else {
+			fmt.Fprint(g.state.writer, cName)
+		}
+		return
 	}
 
 	// Struct/interface field access.
@@ -538,9 +568,9 @@ func (g *Generator) emitExprAsType(node ast.Node, expr ast.Expr, targetType type
 			return
 		}
 	}
-	// Slice nil assignment: emit sentinel-initialized struct instead of NULL.
+	// Slice nil assignment: emit zero-initialized struct instead of NULL.
 	if _, ok := targetType.Underlying().(*types.Slice); ok && isNilType(g.types.TypeOf(expr)) {
-		fmt.Fprintf(g.state.writer, "(so_Slice){&so_Nil, 0, 0}")
+		fmt.Fprintf(g.state.writer, "(so_Slice){0}")
 		return
 	}
 	// Map nil assignment: emit NULL.

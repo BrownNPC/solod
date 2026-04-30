@@ -7,7 +7,7 @@ import "solod.dev/so/c"
 // The returned string is a view into the static environment buffer;
 // the caller must not modify or free it.
 func Getenv(key string) string {
-	ptr := getenv(key).(*byte)
+	ptr := getenv(key)
 	if ptr == nil {
 		return ""
 	}
@@ -23,7 +23,7 @@ func Getenv(key string) string {
 // The returned string is a view into the static environment buffer;
 // the caller must not modify or free it.
 func LookupEnv(key string) (string, bool) {
-	ptr := getenv(key).(*byte)
+	ptr := getenv(key)
 	if ptr == nil {
 		return "", false
 	}

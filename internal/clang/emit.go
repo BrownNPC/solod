@@ -77,18 +77,24 @@ type State struct {
 	macroParams map[string]bool
 }
 
+// Includes holds the C headers to be included in the emitted .h and .c files.
+type Includes struct {
+	header []string // so:include -> emitted in .h
+	impl   []string // so:include.c -> emitted in .c
+}
+
 // Generator is responsible for generating C code from Go ASTs.
 type Generator struct {
 	pkg      *packages.Package
 	types    *types.Info
 	state    State
-	externs  map[string]externInfo // symbols provided by C headers
-	includes []string              // included headers from so:include
-	symbols  []symbol              // pre-collected top-level declarations
-	embeds   Embeds                // embedded C files from so:embed
-	comments ast.CommentMap        // all comments across all files
-	initFunc *ast.FuncDecl         // package init() function, if any
-	panicked bool                  // true after first panic caught in Visit
+	externs  map[types.Object]externInfo // symbols provided by C headers
+	includes Includes                    // included headers from so:include
+	symbols  []symbol                    // pre-collected top-level declarations
+	embeds   Embeds                      // embedded C files from so:embed
+	comments ast.CommentMap              // all comments across all files
+	initFunc *ast.FuncDecl               // package init() function, if any
+	panicked bool                        // true after first panic caught in Visit
 }
 
 // newGenerator creates a new Generator instance.
@@ -96,7 +102,7 @@ func newGenerator(pkg *packages.Package) *Generator {
 	return &Generator{
 		pkg:     pkg,
 		types:   pkg.TypesInfo,
-		externs: make(map[string]externInfo),
+		externs: make(map[types.Object]externInfo),
 	}
 }
 
@@ -104,6 +110,9 @@ func newGenerator(pkg *packages.Package) *Generator {
 func (g *Generator) emitHeader(w io.Writer) {
 	fmt.Fprintf(w, "#pragma once\n")
 	fmt.Fprintf(w, "#include \"so/builtin/builtin.h\"\n")
+	for _, inc := range g.includes.header {
+		fmt.Fprintf(w, "#include %s\n", inc)
+	}
 	g.emitImports(w)
 	g.emitEmbeds(w, g.embeds.header)
 	g.emitHeaderDecls(w)
@@ -114,7 +123,7 @@ func (g *Generator) emitImpl(w io.Writer) {
 	g.state.writer = w
 
 	fmt.Fprintf(w, "#include \"%s.h\"\n", g.pkg.Name)
-	for _, inc := range g.includes {
+	for _, inc := range g.includes.impl {
 		fmt.Fprintf(w, "#include %s\n", inc)
 	}
 

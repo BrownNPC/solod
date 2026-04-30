@@ -43,7 +43,7 @@ func (g *Generator) collectSymbols() {
 				case token.TYPE:
 					for _, spec := range d.Specs {
 						ts := spec.(*ast.TypeSpec)
-						if g.hasExtern("", ts.Name.Name) {
+						if g.hasExtern(g.types.Defs[ts.Name]) {
 							continue
 						}
 						g.symbols = append(g.symbols, symbol{
@@ -77,7 +77,7 @@ func (g *Generator) collectSymbols() {
 					g.initFunc = d
 					continue
 				}
-				if g.hasExtern("", externFuncKey(d)) {
+				if g.hasExtern(g.types.Defs[d.Name]) {
 					continue
 				}
 				kind := symbolFunc
@@ -118,21 +118,23 @@ func (g *Generator) collectExterns() {
 		// Collect include directives from the file.
 		for _, cg := range file.Comments {
 			for _, c := range cg.List {
-				if include, ok := strings.CutPrefix(c.Text, "//so:include"); ok {
-					g.includes = append(g.includes, strings.TrimSpace(include))
+				if path, ok := strings.CutPrefix(c.Text, "//so:include.c"); ok {
+					g.includes.impl = append(g.includes.impl, strings.TrimSpace(path))
+				} else if path, ok := strings.CutPrefix(c.Text, "//so:include"); ok {
+					g.includes.header = append(g.includes.header, strings.TrimSpace(path))
 				}
 			}
 		}
 
 		// Collect extern symbols from declarations.
-		g.collectFileExterns("", file)
+		g.collectFileExterns(g.types, file)
 	}
 
 	// Collect externs from imported packages so that callExtern
 	// can identify cross-package extern calls (e.g. stdio.Printf).
 	for _, imp := range g.pkg.Imports {
 		for _, file := range imp.Syntax {
-			g.collectFileExterns(imp.Name, file)
+			g.collectFileExterns(imp.TypesInfo, file)
 		}
 	}
 }
@@ -187,12 +189,29 @@ func (g *Generator) emitUnexportedTypes(w io.Writer) {
 	}
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "// -- Types --")
+	g.emitForwardTypeDecls(w, typeSyms)
 	for _, sym := range typeSyms {
 		hasDocs := g.emitComments(w, sym.genDecl, sym.typeSpec)
 		if !hasDocs && isBlockTypeSpec(sym.typeSpec) {
 			fmt.Fprintln(w)
 		}
 		g.emitTypeSpec(w, sym.typeSpec)
+	}
+}
+
+// emitForwardTypeDecls writes forward declarations for struct types
+// so that self-referencing and out-of-order references resolve.
+func (g *Generator) emitForwardTypeDecls(w io.Writer, typeSyms []symbol) {
+	hasDecls := false
+	for _, sym := range typeSyms {
+		if _, ok := sym.typeSpec.Type.(*ast.StructType); ok {
+			cName := g.declSymbolName(g.types.Defs[sym.typeSpec.Name])
+			fmt.Fprintf(w, "\ntypedef struct %s %s;", cName, cName)
+			hasDecls = true
+		}
+	}
+	if hasDecls {
+		fmt.Fprintln(w)
 	}
 }
 

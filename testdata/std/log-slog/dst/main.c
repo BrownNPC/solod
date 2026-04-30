@@ -6,7 +6,9 @@ static void defaults(void);
 
 // -- Implementation --
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    so_String _so_argv[argc];
+    so_args_init(argc, argv, _so_argv);
     logger();
     defaults();
 }

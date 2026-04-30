@@ -77,7 +77,7 @@ func (t Time) Format(buf []byte, layout string, offset Offset) string {
 	tm.tm_wday = int(wday)
 	tm.tm_yday = yday - 1
 	tm.tm_isdst = 0
-	n := strftime(c.CharPtr(unsafe.SliceData(buf)), uintptr(len(buf)), layout, &tm)
+	n := strftime((*c.Char)(unsafe.SliceData(buf)), uintptr(len(buf)), layout, &tm)
 	return string(buf[:n])
 }
 

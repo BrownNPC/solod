@@ -1,9 +1,11 @@
 package os
 
+import "solod.dev/so/c"
+
 //so:include <dirent.h>
 //so:include <fcntl.h>
-//so:include <sys/stat.h>
-//so:include <unistd.h>
+//so:include.c <sys/stat.h>
+//so:include.c <unistd.h>
 
 // MaxPathLen is the maximum length of a path.
 const MaxPathLen = 4096
@@ -144,7 +146,7 @@ func fdopen(fd int, mode string) *os_file {
 // char* getcwd(char *buf, size_t size);
 //
 //so:extern
-func getcwd(buf *byte, size uintptr) any {
+func getcwd(buf *c.Char, size uintptr) *c.Char {
 	_, _ = buf, size
 	return nil
 }
@@ -194,7 +196,7 @@ func getuid() uid_t {
 // int gethostname(char* name, size_t namelen);
 //
 //so:extern
-func gethostname(name *byte, namelen uintptr) int {
+func gethostname(name *c.Char, namelen uintptr) int {
 	_, _ = name, namelen
 	return 0
 }
@@ -235,7 +237,7 @@ func mkdir(path string, mode mode_t) int {
 // int mkstemp(char *template);
 //
 //so:extern
-func mkstemp(tmpl *byte) int {
+func mkstemp(tmpl *c.Char) int {
 	_ = tmpl
 	return 0
 }
@@ -243,10 +245,10 @@ func mkstemp(tmpl *byte) int {
 // char* mkdtemp(char *template);
 //
 //so:extern
-func mkdtemp(tmpl *byte) any {
+func mkdtemp(tmpl *c.Char) *c.Char {
 	_ = tmpl
 	b := []byte("example/tmpdir")
-	return &b[0]
+	return (*c.Char)(&b[0])
 }
 
 // DIR *opendir(const char *name);
@@ -268,7 +270,7 @@ func posixOpen(path string, flags int, mode uint32) int {
 // os_readdir_next reads the next directory entry into buf.
 //
 //so:extern
-func os_readdir_next(dir *os_dir, buf *byte, bufsize uintptr) os_readdirResult {
+func os_readdir_next(dir *os_dir, buf *c.Char, bufsize uintptr) os_readdirResult {
 	_, _, _ = dir, buf, bufsize
 	return os_readdirResult{}
 }
@@ -276,7 +278,7 @@ func os_readdir_next(dir *os_dir, buf *byte, bufsize uintptr) os_readdirResult {
 // ssize_t readlink(const char* restrict path, char* restrict buf, size_t bufsize);
 //
 //so:extern
-func readlink(path string, buf *byte, bufsize uintptr) int {
+func readlink(path string, buf *c.Char, bufsize uintptr) int {
 	_, _, _ = path, buf, bufsize
 	return 0
 }

@@ -5,6 +5,8 @@ static so_R_i64_err lenInt64(so_Slice buf);
 static so_R_i64_err lenInt64Impl(so_Slice buf);
 static so_int sumSlice(so_Slice s);
 static void modifySlice(so_Slice s);
+static void acceptSlice(so_Slice s);
+static so_Slice nilSlice(void);
 static so_int sumVariadic(so_Slice nums);
 static so_int main_SliceHolder_sum(main_SliceHolder h);
 static so_int main_SliceHolder_get(main_SliceHolder h, so_int i);
@@ -33,6 +35,14 @@ static so_int sumSlice(so_Slice s) {
 static void modifySlice(so_Slice s) {
     so_at(so_int, s, 0) = 99;
     so_at(so_int, s, 1) = 88;
+}
+
+static void acceptSlice(so_Slice s) {
+    (void)s;
+}
+
+static so_Slice nilSlice(void) {
+    return (so_Slice){0};
 }
 
 static so_int sumVariadic(so_Slice nums) {
@@ -127,14 +137,14 @@ int main(void) {
     }
     {
         // Slice literals.
-        so_Slice nils = (so_Slice){&so_Nil, 0, 0};
-        if (nils.ptr != &so_Nil) {
+        so_Slice nils = (so_Slice){0};
+        if (nils.ptr != NULL) {
             so_panic("want nils == nil");
         }
         if (so_len(nils) != 0) {
             so_panic("want len(nils) == 0");
         }
-        so_Slice empty = (so_Slice){&so_Nil, 0, 0};
+        so_Slice empty = (so_Slice){0};
         if (so_len(empty) != 0) {
             so_panic("want len(empty) == 0");
         }
@@ -501,23 +511,34 @@ int main(void) {
     }
     {
         // Nil slice: comparison.
-        so_Slice s = {&so_Nil, 0, 0};
-        if (s.ptr != &so_Nil) {
+        so_Slice s = {0};
+        if (s.ptr != NULL) {
             so_panic("want nil slice");
         }
         s = (so_Slice){(so_int[1]){1}, 1, 1};
-        if (s.ptr == &so_Nil) {
+        if (s.ptr == NULL) {
             so_panic("want non-nil slice");
         }
     }
     {
         // Nil slice: len and cap.
-        so_Slice s = {&so_Nil, 0, 0};
+        so_Slice s = {0};
         if (so_len(s) != 0) {
             so_panic("want nil len==0");
         }
         if (so_cap(s) != 0) {
             so_panic("want nil cap==0");
+        }
+    }
+    {
+        // Nil slice: pass to function.
+        acceptSlice((so_Slice){0});
+    }
+    {
+        // Nil slice: return from function.
+        so_Slice s = nilSlice();
+        if (s.ptr != NULL) {
+            so_panic("want nil from function");
         }
     }
     {

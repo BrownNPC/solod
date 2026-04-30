@@ -15,16 +15,11 @@ So supports structs, methods, interfaces, slices, maps, multiple returns, and de
 So is for Go developers who want systems-level control without learning a new language. And for C programmers who like Go's safety, structure, and tooling.
 
 [Example](#example) •
-[Installation and usage](#installation-and-usage) •
-[Language tour](doc/spec.md) •
-[Standard library](doc/stdlib.md) •
-[Playground](https://codapi.org/so/) •
-[So by example](example/README.md) •
-[Testing](#testing) •
-[Benchmarks](bench/README.md) •
+[Installation](#installation-and-usage) •
+[Documentation](#documentation-and-examples) •
+[Benchmarks](#testing-and-benchmarks) •
 [Compatibility](#compatibility) •
-[Design principles](doc/design.md) •
-[FAQ](doc/faq.md) •
+[Design](#design-principles-and-faq) •
 [Roadmap](#roadmap) •
 [Contributing](#contributing)
 
@@ -83,7 +78,7 @@ Plus an implementation file `main.c`:
 #include "main.h"
 
 so_int main_Person_Sleep(void* self) {
-    main_Person* p = (main_Person*)self;
+    main_Person* p = self;
     p->Age += 1;
     return p->Age;
 }
@@ -155,31 +150,21 @@ All commands work with Go modules, not individual files (`so run .`, not `so run
 
 Keep in mind that So is new, so it's still a bit rough around the edges.
 
-## Language tour
+## Documentation and examples
 
-To learn about So's features and limitations, check out the brief [overview of the language](./doc/spec.md).
+**[Language tour](./doc/spec.md)**. To learn about So's features and limitations, check out the brief overview of the language.
 
-## Standard library
+**[Standard library](./doc/stdlib.md)**. So provides a growing set of packages similar to Go's stdlib.
 
-So provides a growing set of [packages](./doc/stdlib.md) similar to Go's stdlib.
+**[Playground](https://codapi.org/so/)**. Try So online without installing anything. You can run the code or view the translated C output.
 
-## Playground
+**[So by example](./example/README.md)**. If you like learning by doing, try a hands-on introduction to So with annotated example programs.
 
-[Try So online](https://codapi.org/so/) without installing anything. You can run the code or view the translated C output.
+## Testing and benchmarks
 
-## So by example
+**Testing**. So doesn't have its own testing framework. Since So code is valid Go code, you can just use `go test` like you normally would. Plus, your tests can use all Go features because they're never transpiled.
 
-If you like learning by doing, try a [hands-on introduction](./example/README.md) to So with annotated example programs.
-
-## Testing
-
-So doesn't have its own testing framework. Since So code is valid Go code, you can just use `go test` like you normally would. Plus, your tests can use all Go features because they're never transpiled.
-
-The transpilation logic is covered by the So compiler's own tests.
-
-## Benchmarks
-
-So truly shines when it comes to C interop, but it's also [quite fast](bench/README.md) on regular Go code — typically on par with or faster than Go.
+**[Benchmarks](bench/README.md)**. So truly shines when it comes to C interop, but it's also quite fast on regular Go code — typically on par with or faster than Go.
 
 ## Compatibility
 
@@ -198,26 +183,26 @@ Supported operating systems: Linux, macOS, and Windows (core language only).
 
 Supported platforms: amd64, arm64, and riscv64. 32-bit targets are not supported.
 
-## Design principles
+## Design principles and FAQ
 
-So is [highly opinionated](doc/design.md). Simplicity is key. Heap allocations are explicit. Strictly Go syntax.
+**[Principles](doc/design.md)**. So is highly opinionated. Simplicity is key. Heap allocations are explicit. Strictly Go syntax.
 
-## Frequently asked questions
-
-I have heard these several times, so it's [worth answering](doc/faq.md).
+**[Frequently asked questions](doc/faq.md)**. I have heard these several times, so it's worth answering.
 
 ## Roadmap
 
 ✅ Core language features.
 
-⏳ Core stdlib packages (v0.1):
+✅ Core stdlib packages (v0.1):
 
 ```text
-✗ bufio       ✓ fmt     ✓ os        ✓ strings
-✓ bytes       ✓ io      ✓ rand      ✓ strconv
-✗ filepath    ✓ maps    ✓ slices    ✓ time
-✗ flag        ✓ math    ✗ slog      ✓ unicode
+✓ bufio    ✓ io      ✓ path      ✓ strings
+✓ bytes    ✓ maps    ✓ rand      ✓ strconv
+✓ flag     ✓ math    ✓ slices    ✓ time
+✓ fmt      ✓ os      ✓ slog      ✓ unicode
 ```
+
+⏳ v0.1 is feature-ready, and I'm currently working on example applications before releasing it.
 
 ⬜ Networking (v0.2).
 

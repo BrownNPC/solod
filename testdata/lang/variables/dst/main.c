@@ -2,6 +2,8 @@
 
 // -- Types --
 
+typedef struct person person;
+
 typedef struct person {
     so_int age;
 } person;
@@ -101,7 +103,7 @@ int main(void) {
         (void)vRune;
         so_String vString = so_str("");
         (void)vString;
-        so_Slice vSlice = {&so_Nil, 0, 0};
+        so_Slice vSlice = {0};
         (void)vSlice;
         person vStruct = {0};
         (void)vStruct;

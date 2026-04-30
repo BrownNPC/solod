@@ -28,6 +28,8 @@ const (
 	SeekEnd     = 2 // seek relative to the end
 )
 
+const defaultBufSize = 8 * 1024 // 8KB
+
 // EOF is the error returned by Read when no more input is available.
 // (Read must return EOF itself, not an error wrapping EOF,
 // because callers will test for EOF using ==.)
@@ -78,7 +80,7 @@ var ErrWhence = errors.New("io: invalid whence")
 //
 // Copy allocates a buffer on the stack to hold data during the copy.
 func Copy(dst Writer, src Reader) (int64, error) {
-	size := 8 * 1024 // 8 KiB
+	size := defaultBufSize
 	_, ok := src.(*LimitedReader)
 	if ok {
 		l := src.(*LimitedReader)
@@ -91,37 +93,7 @@ func Copy(dst Writer, src Reader) (int64, error) {
 		}
 	}
 	buf := make([]byte, size)
-
-	var written int64
-	var err error
-	for {
-		nr, er := src.Read(buf)
-		if nr > 0 {
-			nw, ew := dst.Write(buf[0:nr])
-			if nw < 0 || nr < nw {
-				nw = 0
-				if ew == nil {
-					ew = ErrInvalidWrite
-				}
-			}
-			written += int64(nw)
-			if ew != nil {
-				err = ew
-				break
-			}
-			if nr != nw {
-				err = ErrShortWrite
-				break
-			}
-		}
-		if er != nil {
-			if er != EOF {
-				err = er
-			}
-			break
-		}
-	}
-	return written, err
+	return copyBuffer(dst, src, buf)
 }
 
 // CopyN copies n bytes (or until an error) from src to dst.
@@ -227,4 +199,39 @@ func ReadFull(r Reader, buf []byte) (int, error) {
 // [Writer.Write] is called exactly once.
 func WriteString(w Writer, s string) (int, error) {
 	return w.Write([]byte(s))
+}
+
+// copyBuffer is the actual implementation of Copy and CopyN,
+// with a buffer provided by the caller.
+func copyBuffer(dst Writer, src Reader, buf []byte) (int64, error) {
+	var written int64
+	var err error
+	for {
+		nr, er := src.Read(buf)
+		if nr > 0 {
+			nw, ew := dst.Write(buf[0:nr])
+			if nw < 0 || nr < nw {
+				nw = 0
+				if ew == nil {
+					ew = ErrInvalidWrite
+				}
+			}
+			written += int64(nw)
+			if ew != nil {
+				err = ew
+				break
+			}
+			if nr != nw {
+				err = ErrShortWrite
+				break
+			}
+		}
+		if er != nil {
+			if er != EOF {
+				err = er
+			}
+			break
+		}
+	}
+	return written, err
 }

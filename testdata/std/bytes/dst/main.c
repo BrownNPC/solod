@@ -236,7 +236,7 @@ int main(void) {
     }
     {
         // Buffer (heap-allocated).
-        bytes_Buffer buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){&so_Nil, 0, 0});
+        bytes_Buffer buf = bytes_NewBuffer((mem_Allocator){0}, (so_Slice){0});
         bytes_Buffer_WriteString(&buf, so_str("hello"));
         bytes_Buffer_WriteString(&buf, so_str(" world"));
         if (so_string_ne(bytes_Buffer_String(&buf), so_str("hello world"))) {
@@ -269,7 +269,7 @@ int main(void) {
         so_Slice b = _res3.val;
         so_Error err = _res3.err;
         if (err != NULL) {
-            so_panic(err->msg);
+            so_panic(errors_cstr(err));
         }
         if (so_string_ne(so_bytes_string(b), s)) {
             so_panic("Reader Read failed");

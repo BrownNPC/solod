@@ -1,7 +1,4 @@
 #include "main.h"
-#include <stdint.h>
-#include <stdio.h>
-#include "person.ext.h"
 
 // -- Implementation --
 
@@ -32,5 +29,27 @@ int main(void) {
         if (INT64_MAX <= ((so_int)1 << 62)) {
             so_panic("maxInt64 <= 1<<62");
         }
+    }
+    {
+        // Extern variadic function.
+        Account acc = (Account){.name = so_str("Bob")};
+        write_acc(&acc, "Hello %s!", "world");
+    }
+    {
+        // Extern function pointer.
+        Account acc = (Account){.name = so_str("Charlie"), .write = write_acc};
+        acc.write(&acc, "Balance: %d", 123);
+    }
+    {
+        // Extern function pointer on a type alias.
+        Account acc = (Account){.write = write_acc};
+        Account target = (Account){.name = so_str("Diana")};
+        acc.write(&target, "Balance: %d", 456);
+    }
+    {
+        // Extern function pointer from a different package.
+        Stream s = {0};
+        s.Write = Discard;
+        s.Write("Hello, %s!", "world");
     }
 }

@@ -30,9 +30,11 @@ static bool shapeIsRect(main_Shape s) {
 }
 
 static main_Rect* shapeAsRect(main_Shape s) {
-    bool ok = (s.Area == main_Rect_Area);
-    if (!ok) {
-        return NULL;
+    {
+        bool ok = (s.Area == main_Rect_Area);
+        if (!ok) {
+            return NULL;
+        }
     }
     main_Rect* r = (main_Rect*)s.self;
     return r;

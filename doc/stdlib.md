@@ -2,12 +2,14 @@
 
 Solod provides a growing set of high-level packages similar to Go's stdlib, and a low-level package to help with C interop. For full API details, see the [package documentation](https://pkg.go.dev/solod.dev/so).
 
+[bufio](#sobufio) •
 [bytes](#sobytes) •
 [c](#soc) •
 [cmp](#socmp) •
 [crypto/crand](#socryptocrand) •
 [encoding/binary](#soencodingbinary) •
 [errors](#soerrors) •
+[flag](#soflag) •
 [fmt](#sofmt) •
 [io](#soio) •
 [log/slog](#sologslog) •
@@ -17,6 +19,7 @@ Solod provides a growing set of high-level packages similar to Go's stdlib, and 
 [math/rand](#somathrand) •
 [mem](#somem) •
 [os](#soos) •
+[path](#sopath) •
 [runtime](#soruntime) •
 [slices](#soslices) •
 [strconv](#sostrconv) •
@@ -24,6 +27,25 @@ Solod provides a growing set of high-level packages similar to Go's stdlib, and 
 [time](#sotime) •
 [unicode](#sounicode) •
 [unicode/utf8](#sounicodeutf8)
+
+## [so/bufio](https://pkg.go.dev/solod.dev/so/bufio)
+
+Buffered I/O. Wraps an `io.Reader` or `io.Writer` with buffering and helpers for textual I/O. Based on Go's `bufio` package.
+
+Functions:
+
+- `NewReader` and `NewReaderSize` create a buffered reader.
+- `NewWriter` and `NewWriterSize` create a buffered writer.
+- `NewReadWriter` combines a Reader and Writer into a single `io.ReadWriter`.
+- `NewScanner` creates a scanner for token-based reading (lines, words, bytes, or custom split functions).
+- `ScanLines`, `ScanWords`, `ScanBytes` and `ScanRunes` are built-in split functions for `Scanner`.
+
+Types:
+
+- `Reader` wraps an `io.Reader` with buffering.
+- `Writer` wraps an `io.Writer` with buffering.
+- `ReadWriter` combines a Reader and Writer.
+- `Scanner` reads tokens from an `io.Reader` using a `SplitFunc`.
 
 ## [so/bytes](https://pkg.go.dev/solod.dev/so/bytes)
 
@@ -56,13 +78,20 @@ Types:
 
 Low-level C interop helpers for pointers, strings, and type information.
 
+Functions:
+
 - `Alignof` and `Sizeof` return the alignment and size of type T.
 - `Alloca` allocates an array on the stack.
 - `Assert` aborts with a message if a condition is false.
 - `Bytes`, `Slice` and `String` wrap C pointers to So types.
-- `CharPtr` - cast a `*byte` to `char*`.
+- `CString` converts a So string to a null-terminated C string.
 - `PtrAdd`, `PtrAs` and `PtrAt` manipulate pointers.
+- `Val` and `Raw` emit raw C code.
 - `Zero` returns the zero value of type T.
+
+Types:
+
+- `Char` and `ConstChar` represent a C `char` type.
 
 ## [so/cmp](https://pkg.go.dev/solod.dev/so/cmp)
 
@@ -104,6 +133,23 @@ Error creation from text messages.
 - `New(text string) error` - create a new error with the given message.
 
 So only supports sentinel errors, which are defined at the package level using `New`.
+
+## [so/flag](https://pkg.go.dev/solod.dev/so/flag)
+
+Command-line flag parsing. Based on Go's `flag` package.
+
+Functions:
+
+- `BoolVar`, `IntVar`, `UintVar`, `Float64Var` and `StringVar` define typed flags.
+- `Var` defines a flag with a custom `Value` implementation.
+- `Parse` parses command-line flags from `os.Args`.
+- `Args` returns the non-flag command-line arguments after parsing.
+
+Types:
+
+- `FlagSet` represents a set of defined flags with its own error handling and output.
+- `Flag` represents a single flag.
+- `Value` is the interface for custom flag values.
 
 ## [so/fmt](https://pkg.go.dev/solod.dev/so/fmt)
 
@@ -229,12 +275,29 @@ Functions:
 - `Getpid`, `Getppid`, `Getuid`, `Geteuid`, `Getgid`, `Getegid` return process/user info.
 - `Exit` terminates the program with the given status code.
 
+Variables:
+
+- `Args` holds the command-line arguments, starting with the program name.
+
 Types:
 
 - `File` represents an open file with methods for reading and writing data.
 - `FileInfo` describes a file (returned by `Stat` and `Lstat`).
 - `FileMode` represents a file's mode and permission bits.
 - `DirEntry` describes an entry in a directory (returned by `ReadDir`).
+
+## [so/path](https://pkg.go.dev/solod.dev/so/path)
+
+Utility routines for manipulating slash-separated paths. Based on Go's `path` package.
+
+- `Base` returns the last element of a path.
+- `Clean` returns the shortest equivalent path by lexical processing.
+- `Dir` returns all but the last element of a path.
+- `Ext` returns the file name extension used by a path.
+- `IsAbs` reports whether a path is absolute.
+- `Join` joins path elements into a single path.
+- `Match` reports whether a name matches a shell pattern.
+- `Split` splits a path into directory and file components.
 
 ## [so/runtime](https://pkg.go.dev/solod.dev/so/runtime)
 

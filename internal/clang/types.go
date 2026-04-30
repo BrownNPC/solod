@@ -77,10 +77,13 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 		obj := t.Obj()
 		if obj.Pkg() != nil && obj.Pkg() != g.pkg.Types {
 			// This is a named type from another package.
+			if info, ok := g.getExtern(obj); ok && info.name != "" {
+				return info.name
+			}
 			return obj.Pkg().Name() + "_" + obj.Name()
 		}
 		if obj.Parent() == g.pkg.Types.Scope() {
-			return g.symbolName(obj.Name())
+			return g.symbolName(obj)
 		}
 		return obj.Name()
 
@@ -102,7 +105,7 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 				continue
 			}
 			if types.Identical(tn.Type().Underlying(), t) {
-				return g.symbolName(tn.Name())
+				return g.symbolName(tn)
 			}
 		}
 		g.fail(node, "no matching function type for signature")
@@ -123,8 +126,10 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 		return "float"
 	case types.Float64, types.UntypedFloat:
 		return "double"
-	case types.Int, types.UntypedInt:
+	case types.Int:
 		return "so_int"
+	case types.UntypedInt:
+		return "int64_t"
 	case types.Int8:
 		return "int8_t"
 	case types.Int16:
@@ -177,7 +182,7 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 
 	// Slices.
 	if _, ok := typ.Underlying().(*types.Slice); ok {
-		return "{&so_Nil, 0, 0}"
+		return "{0}"
 	}
 
 	// Maps.
@@ -227,20 +232,21 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 
 // declSymbolName returns the C name for a declaration that could be
 // either package-level or function-local.
-func (g *Generator) declSymbolName(name string) string {
+func (g *Generator) declSymbolName(obj types.Object) string {
 	if g.state.indent == 0 {
-		return g.symbolName(name)
+		return g.symbolName(obj)
 	}
-	return name
+	return obj.Name()
 }
 
 // symbolName returns the C symbol name for a Go identifier.
 // Exported names are prefixed with the package name (e.g. RectArea -> geom_RectArea).
 // Extern symbols with a name override use the specified C name instead.
-func (g *Generator) symbolName(name string) string {
-	if info, ok := g.getExtern("", name); ok && info.name != "" {
+func (g *Generator) symbolName(obj types.Object) string {
+	if info, ok := g.getExtern(obj); ok && info.name != "" {
 		return info.name
 	}
+	name := obj.Name()
 	if ast.IsExported(name) {
 		return g.pkg.Name + "_" + name
 	}

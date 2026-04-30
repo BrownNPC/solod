@@ -3,10 +3,10 @@ package math
 
 import "math" // for testing
 
-//so:include <float.h>
-//so:include <limits.h>
-//so:include <math.h>
-//so:include <stdint.h>
+//so:include.c <float.h>
+//so:include.c <limits.h>
+//so:include.c <math.h>
+//so:include.c <stdint.h>
 
 // Floating-point limit values.
 // Max is the largest finite value representable by the type.
@@ -200,9 +200,9 @@ func round(x float64) float64 { return math.Round(x) }
 // Floating-point manipulation functions.
 
 //so:extern
-func frexp(f float64, exp *int32) float64 {
+func frexp(f float64, exp *int) float64 {
 	frac, e := math.Frexp(f)
-	*exp = int32(e)
+	*exp = e
 	return frac
 }
 

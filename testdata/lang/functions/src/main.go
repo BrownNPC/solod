@@ -1,5 +1,7 @@
 package main
 
+import "example/functions/src/sub"
+
 type Sum3Fn func(int, int, int) int
 type sum3Fn func(int, int, int) int
 
@@ -29,4 +31,8 @@ func main() {
 	// }
 	// s4 := fn4(2, 3, 4)
 	// _ = s4
+
+	var fn5 Sum3Fn = sub.Sum
+	s5 := fn5(10, 20, 30)
+	_ = s5
 }
