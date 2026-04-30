@@ -8,9 +8,9 @@ so_Slice os_Args = {0};
 // utf8_decode decodes one UTF-8 rune from string s at byte offset i.
 // Stores the byte width in *w.
 // Returns the decoded rune, or 0xFFFD for invalid UTF-8.
-so_rune so_utf8_decode(so_String s, so_int i, so_int* w) {
+so_rune so_utf8_decode(so_String s, int64_t i, int64_t* w) {
     const uint8_t* p = (const uint8_t*)s.ptr + i;
-    so_int remaining = s.len - i;
+    int64_t remaining = s.len - i;
     if (remaining <= 0) {
         *w = 0;
         return 0xFFFD;
@@ -51,9 +51,9 @@ so_rune so_utf8_decode(so_String s, so_int i, so_int* w) {
 
 // string_runes_impl decodes UTF-8 string bytes into a rune buffer.
 so_Slice so_string_runes_impl(so_String s, so_rune* buf) {
-    so_int n = 0;
-    for (so_int i = 0; i < s.len;) {
-        so_int w = 0;
+    int64_t n = 0;
+    for (int64_t i = 0; i < s.len;) {
+        int64_t w = 0;
         buf[n++] = so_utf8_decode(s, i, &w);
         i += w;
     }
@@ -62,7 +62,7 @@ so_Slice so_string_runes_impl(so_String s, so_rune* buf) {
 
 // utf8_encode encodes a single rune into buf (up to 4 bytes).
 // Returns the number of bytes written.
-so_int so_utf8_encode(so_rune r, char* buf) {
+int64_t so_utf8_encode(so_rune r, char* buf) {
     if (r < 0x80) {
         buf[0] = (char)r;
         return 1;
@@ -87,9 +87,9 @@ so_int so_utf8_encode(so_rune r, char* buf) {
 
 // runes_string_impl encodes runes into a UTF-8 buffer and returns a string.
 so_String so_runes_string_impl(so_Slice rs, char* buf) {
-    so_int pos = 0;
+    int64_t pos = 0;
     so_rune* runes = (so_rune*)rs.ptr;
-    for (so_int i = 0; i < rs.len; i++) {
+    for (int64_t i = 0; i < rs.len; i++) {
         pos += so_utf8_encode(runes[i], buf + pos);
     }
     return (so_String){buf, pos};

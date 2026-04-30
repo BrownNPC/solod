@@ -200,9 +200,9 @@ func round(x float64) float64 { return math.Round(x) }
 // Floating-point manipulation functions.
 
 //so:extern
-func frexp(f float64, exp *int32) float64 {
+func frexp(f float64, exp *int) float64 {
 	frac, e := math.Frexp(f)
-	*exp = int32(e)
+	*exp = e
 	return frac
 }
 

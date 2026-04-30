@@ -45,7 +45,7 @@
 #define so_build_riscv64
 #endif
 
-_Static_assert(sizeof(void*) == 8, "64-bit platform required");
+// _Static_assert(sizeof(void*) == 8, "64-bit platform required");
 
 // --- General utilities ---
 
@@ -57,8 +57,8 @@ _Static_assert(sizeof(void*) == 8, "64-bit platform required");
 
 typedef uint8_t so_byte;
 typedef int32_t so_rune;
-typedef int64_t so_int;
-typedef uint64_t so_uint;
+typedef int so_int;
+typedef unsigned int so_uint;
 
 // --- Alloca safety ---
 
@@ -80,11 +80,11 @@ typedef uint64_t so_uint;
 // String is a pointer to array of bytes plus a length.
 typedef struct {
     const char* ptr;
-    so_int len;
+    int64_t len;
 } so_String;
 
 // strlit creates a String from a string literal.
-#define so_str(s) ((so_String){s, (so_int)(sizeof(s) - 1)})
+#define so_str(s) ((so_String){s, (int64_t)(sizeof(s) - 1)})
 
 // cstr returns a null-terminated C string copy on the stack.
 #define so_cstr(s) ({                                     \
@@ -98,8 +98,8 @@ typedef struct {
 // string_slice creates a substring [from, to).
 #define so_string_slice(s, from, to) ({       \
     so_String _s = (s);                       \
-    so_int _from = (so_int)(from);            \
-    so_int _to = (so_int)(to);                \
+    int64_t _from = (int64_t)(from);            \
+    int64_t _to = (int64_t)(to);                \
     assert((_to <= _s.len && _from <= _to) && \
            "slice bounds out of range");      \
     (so_String){_s.ptr + _from, _to - _from}; \
@@ -110,7 +110,7 @@ typedef struct {
 #define so_string_add(s1, s2) ({                                       \
     so_String _s1 = (s1);                                              \
     so_String _s2 = (s2);                                              \
-    so_int _total = _s1.len + _s2.len;                                 \
+    int64_t _total = _s1.len + _s2.len;                                 \
     char* _buf = so_alloca(_total);                                    \
     if (_s1.len > 0) memcpy(_buf, _s1.ptr, (size_t)_s1.len);           \
     if (_s2.len > 0) memcpy(_buf + _s1.len, _s2.ptr, (size_t)_s2.len); \
@@ -130,7 +130,7 @@ static inline bool so_string_ne(so_String s1, so_String s2) {
 
 // string_lt returns true if s1 < s2 in lexicographical order.
 static inline bool so_string_lt(so_String s1, so_String s2) {
-    so_int n = s1.len < s2.len ? s1.len : s2.len;
+    int64_t n = s1.len < s2.len ? s1.len : s2.len;
     int cmp = n > 0 ? memcmp(s1.ptr, s2.ptr, (size_t)n) : 0;
     return cmp < 0 || (cmp == 0 && s1.len < s2.len);
 }
@@ -142,7 +142,7 @@ static inline bool so_string_lte(so_String s1, so_String s2) {
 
 // string_gt returns true if s1 > s2 in lexicographical order.
 static inline bool so_string_gt(so_String s1, so_String s2) {
-    so_int n = s1.len < s2.len ? s1.len : s2.len;
+    int64_t n = s1.len < s2.len ? s1.len : s2.len;
     int cmp = n > 0 ? memcmp(s1.ptr, s2.ptr, (size_t)n) : 0;
     return cmp > 0 || (cmp == 0 && s1.len > s2.len);
 }
@@ -155,7 +155,7 @@ static inline bool so_string_gte(so_String s1, so_String s2) {
 // utf8_decode decodes one UTF-8 rune from string s at byte offset i.
 // Stores the byte width in *w.
 // Returns the decoded rune, or 0xFFFD for invalid UTF-8.
-so_rune so_utf8_decode(so_String s, so_int i, so_int* w);
+so_rune so_utf8_decode(so_String s, int64_t i, int64_t* w);
 
 // --- Arrays ---
 
@@ -172,17 +172,17 @@ static inline bool so_array_ne(const void* a, const void* b, size_t size) {
 // array_slice creates a slice from a C array.
 // 'size' is the total array size (known at compile time).
 #define so_array_slice(T, arr, from, to, size) ({                \
-    so_int _from = (so_int)(from);                               \
-    so_int _to = (so_int)(to);                                   \
-    so_int _size = (so_int)(size);                               \
+    int64_t _from = (int64_t)(from);                               \
+    int64_t _to = (int64_t)(to);                                   \
+    int64_t _size = (int64_t)(size);                               \
     ((so_Slice){(T*)(arr) + _from, _to - _from, _size - _from}); \
 })
 
 // array_slice3 creates a slice from a C array with an explicit capacity.
 #define so_array_slice3(T, arr, from, to, max) ({               \
-    so_int _from = (so_int)(from);                              \
-    so_int _to = (so_int)(to);                                  \
-    so_int _max = (so_int)(max);                                \
+    int64_t _from = (int64_t)(from);                              \
+    int64_t _to = (int64_t)(to);                                  \
+    int64_t _max = (int64_t)(max);                                \
     ((so_Slice){(T*)(arr) + _from, _to - _from, _max - _from}); \
 })
 
@@ -191,14 +191,14 @@ static inline bool so_array_ne(const void* a, const void* b, size_t size) {
 // Slice is a pointer to array of elements plus a length.
 typedef struct {
     void* ptr;
-    so_int len;
-    so_int cap;
+    int64_t len;
+    int64_t cap;
 } so_Slice;
 
 // make_slice creates a zero-initialized slice on the stack.
 // Allocates memory on the stack until the calling function returns.
 #define so_make_slice(T, len, cap) ({     \
-    so_int _cap = (so_int)(cap);          \
+    int64_t _cap = (int64_t)(cap);          \
     size_t _n = sizeof(T) * (size_t)_cap; \
     void* _p = _n ? so_alloca(_n) : NULL; \
     if (_n) memset(_p, 0, _n);            \
@@ -209,8 +209,8 @@ typedef struct {
 // from index 'from' (inclusive) to index 'to' (exclusive).
 #define so_slice(T, s, from, to) ({                       \
     so_Slice _s = (s);                                    \
-    so_int _from = (so_int)(from);                        \
-    so_int _to = (so_int)(to);                            \
+    int64_t _from = (int64_t)(from);                        \
+    int64_t _to = (int64_t)(to);                            \
     assert((_to <= _s.cap && _from <= _to) &&             \
            "slice bounds out of range");                  \
     T* _ptr = _s.ptr == NULL ? NULL : (T*)_s.ptr + _from; \
@@ -220,9 +220,9 @@ typedef struct {
 // slice3 creates a slice from another slice with an explicit capacity.
 #define so_slice3(T, s, from, to, max) ({                      \
     so_Slice _s = (s);                                         \
-    so_int _from = (so_int)(from);                             \
-    so_int _to = (so_int)(to);                                 \
-    so_int _max = (so_int)(max);                               \
+    int64_t _from = (int64_t)(from);                             \
+    int64_t _to = (int64_t)(to);                                 \
+    int64_t _max = (int64_t)(max);                               \
     assert((_max <= _s.cap && _to <= _max && _from <= _to) &&  \
            "slice bounds out of range");                       \
     (so_Slice){(T*)_s.ptr + _from, _to - _from, _max - _from}; \
@@ -264,7 +264,7 @@ so_String so_runes_string_impl(so_Slice rs, char* buf);
 
 // utf8_encode encodes a single rune into buf (up to 4 bytes).
 // Returns the number of bytes written.
-so_int so_utf8_encode(so_rune r, char* buf);
+int64_t so_utf8_encode(so_rune r, char* buf);
 
 // byte_string creates a string from a single byte.
 // Allocates memory on the stack until the calling function returns.
@@ -278,7 +278,7 @@ so_int so_utf8_encode(so_rune r, char* buf);
 // Allocates memory on the stack until the calling function returns.
 #define so_rune_string(r) ({                        \
     char* _buf = so_alloca(4);                      \
-    so_int _n = so_utf8_encode((so_rune)(r), _buf); \
+    int64_t _n = so_utf8_encode((so_rune)(r), _buf); \
     (so_String){_buf, _n};                          \
 })
 
@@ -288,7 +288,7 @@ so_int so_utf8_encode(so_rune r, char* buf);
 #define so_append(T, s, ...) ({                                   \
     so_Slice _s = (s);                                            \
     T _vals[] = {__VA_ARGS__};                                    \
-    so_int _n = (so_int)(sizeof(_vals) / sizeof(T));              \
+    int64_t _n = (int64_t)(sizeof(_vals) / sizeof(T));              \
     assert((_s.len + _n <= _s.cap) && "append: out of capacity"); \
     memcpy((T*)_s.ptr + _s.len, _vals, sizeof(_vals));            \
     _s.len += _n;                                                 \
@@ -313,16 +313,16 @@ so_int so_utf8_encode(so_rune r, char* buf);
 // copy copies elements from src to dst. Returns the number of elements copied
 // (which is the minimum of dst.len and src.len).
 #define so_copy(T, dst, src) so_copy_impl(dst, src, sizeof(T))
-static inline so_int so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) {
-    so_int _n = dst.len < src.len ? dst.len : src.len;
+static inline int64_t so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) {
+    int64_t _n = dst.len < src.len ? dst.len : src.len;
     if (_n > 0) memmove(dst.ptr, src.ptr, (size_t)(_n)*elem_size);
     return _n;
 }
 
 // copy_string copies bytes from a string to a byte slice. Returns the number
 // of bytes copied (which is the minimum of dst.len and src.len).
-static inline so_int so_copy_string(so_Slice dst, so_String src) {
-    so_int _n = dst.len < src.len ? dst.len : src.len;
+static inline int64_t so_copy_string(so_Slice dst, so_String src) {
+    int64_t _n = dst.len < src.len ? dst.len : src.len;
     if (_n > 0) memmove(dst.ptr, src.ptr, (size_t)_n);
     return _n;
 }
@@ -339,7 +339,7 @@ static inline so_int so_copy_string(so_Slice dst, so_String src) {
 #define so_at(T, s, i) (*so_at_ptr(T, s, i))
 #define so_at_ptr(T, s, i) ({                        \
     so_auto _s_at = (s);                             \
-    so_int _i = (so_int)(i);                         \
+    int64_t _i = (int64_t)(i);                         \
     assert(_i < _s_at.len && "index out of bounds"); \
     (T*)_s_at.ptr + _i;                              \
 })
@@ -430,7 +430,7 @@ typedef struct {
     so_Error err;
 } so_R_byte_err;
 typedef struct {
-    so_int val;
+    int64_t val;
     so_Error err;
 } so_R_int_err;
 typedef struct {
@@ -446,7 +446,7 @@ typedef struct {
     so_Error err;
 } so_R_str_err;
 typedef struct {
-    so_uint val;
+    uint64_t val;
     so_Error err;
 } so_R_uint_err;
 typedef struct {
@@ -469,7 +469,7 @@ typedef struct {
 } so_R_bool_bool;
 typedef struct {
     bool val;
-    so_int val2;
+    int64_t val2;
 } so_R_bool_int;
 typedef struct {
     double val;
@@ -481,7 +481,7 @@ typedef struct {
 } so_R_f64_f64;
 typedef struct {
     double val;
-    so_int val2;
+    int64_t val2;
 } so_R_f64_int;
 typedef struct {
     float val;
@@ -492,15 +492,15 @@ typedef struct {
     int32_t val2;
 } so_R_i64_i32;
 typedef struct {
-    so_int val;
+    int64_t val;
     bool val2;
 } so_R_int_bool;
 typedef struct {
-    so_int val;
-    so_int val2;
+    int64_t val;
+    int64_t val2;
 } so_R_int_int;
 typedef struct {
-    so_int val;
+    int64_t val;
     uint64_t val2;
 } so_R_int_u64;
 typedef struct {
@@ -509,7 +509,7 @@ typedef struct {
 } so_R_rune_bool;
 typedef struct {
     so_rune val;
-    so_int val2;
+    int64_t val2;
 } so_R_rune_int;
 typedef struct {
     so_String val;
@@ -520,8 +520,8 @@ typedef struct {
     so_String val2;
 } so_R_str_str;
 typedef struct {
-    so_uint val;
-    so_uint val2;
+    uint64_t val;
+    uint64_t val2;
 } so_R_uint_uint;
 typedef struct {
     uint32_t val;
@@ -529,7 +529,7 @@ typedef struct {
 } so_R_u32_bool;
 typedef struct {
     uint32_t val;
-    so_int val2;
+    int64_t val2;
 } so_R_u32_int;
 typedef struct {
     uint32_t val;
@@ -541,7 +541,7 @@ typedef struct {
 } so_R_u64_bool;
 typedef struct {
     uint64_t val;
-    so_int val2;
+    int64_t val2;
 } so_R_u64_int;
 typedef struct {
     uint64_t val;
@@ -566,7 +566,7 @@ int so_println(const char* format, ...);
 static inline void* unsafe_Add(void* ptr, size_t offset) {
     return (char*)ptr + offset;
 }
-static inline so_String unsafe_String(void* ptr, so_int len) {
+static inline so_String unsafe_String(void* ptr, int64_t len) {
     if (ptr == NULL) {
         return (so_String){0};
     }
@@ -578,7 +578,7 @@ static inline so_byte* unsafe_StringData(so_String s) {
     }
     return (so_byte*)s.ptr;
 }
-static inline so_Slice unsafe_Slice(void* ptr, so_int len) {
+static inline so_Slice unsafe_Slice(void* ptr, int64_t len) {
     if (ptr == NULL) {
         return (so_Slice){0};
     }
@@ -600,9 +600,9 @@ extern so_Slice os_Args;
 // buf must be a so_String array of at least argc elements (VLA on main's stack).
 static inline void so_args_init(int argc, char* argv[], so_String* buf) {
     for (int i = 0; i < argc; i++) {
-        buf[i] = (so_String){argv[i], (so_int)strlen(argv[i])};
+        buf[i] = (so_String){argv[i], (int64_t)strlen(argv[i])};
     }
-    os_Args = (so_Slice){buf, (so_int)argc, (so_int)argc};
+    os_Args = (so_Slice){buf, (int64_t)argc, (int64_t)argc};
 }
 
 // --- Map type ---
@@ -612,22 +612,22 @@ typedef struct {
     void* keys;
     void* vals;
     uint8_t* used;  // 0=empty, 1=occupied
-    so_int len;
-    so_int cap;  // always power of 2
+    int64_t len;
+    int64_t cap;  // always power of 2
 } so_Map;
 
 // key_hash hashes a map key to a 64-bit value (FNV-1a).
 // The seed is the map's own address (randomized by ASLR).
-static inline uint64_t so_key_hash_def(const void* ptr, so_int n, uint64_t seed) {
+static inline uint64_t so_key_hash_def(const void* ptr, int64_t n, uint64_t seed) {
     const uint8_t* p = (const uint8_t*)ptr;
     uint64_t h = seed;
-    for (so_int i = 0; i < n; i++) {
+    for (int64_t i = 0; i < n; i++) {
         h ^= p[i];
         h *= 0x100000001b3ULL;
     }
     return h;
 }
-static inline uint64_t so_key_hash_str(const void* ptr, so_int n, uint64_t seed) {
+static inline uint64_t so_key_hash_str(const void* ptr, int64_t n, uint64_t seed) {
     (void)n;
     const so_String* s = (const so_String*)ptr;
     return so_key_hash_def(s->ptr, s->len, seed);
@@ -650,7 +650,7 @@ static inline bool so_key_eq_str(const void* a, const void* b, size_t n) {
     _Generic((key), so_String: so_key_eq_str, default: so_key_eq_def)
 
 // map_nextpow2 rounds up to the next power of 2.
-static inline so_int so_map_nextpow2(so_int n) {
+static inline int64_t so_map_nextpow2(int64_t n) {
     if (n == 0) return 1;
     n--;
     n |= n >> 1;
@@ -663,7 +663,7 @@ static inline so_int so_map_nextpow2(so_int n) {
 }
 
 // map_cap computes the internal capacity for n elements (keeps load <= 75%).
-static inline so_int so_map_cap(so_int n) {
+static inline int64_t so_map_cap(int64_t n) {
     if (n == 0) return 0;
     return so_map_nextpow2(n + n / 3 + 1);
 }
@@ -682,7 +682,7 @@ static inline void so_map_find(const so_Map* m, const void* key, size_t key_size
     size_t mask = m->cap - 1;
     size_t step = (size_t)(hash >> 32) | 1;
     size_t idx = (size_t)hash & mask;
-    for (so_int p = 0; p < m->cap; p++) {
+    for (int64_t p = 0; p < m->cap; p++) {
         if (!m->used[idx]) {
             *found = false;
             return;
@@ -708,7 +708,7 @@ static inline void so_map_set_impl(so_Map* m, const void* key, size_t key_size,
     size_t mask = m->cap - 1;
     size_t step = (size_t)(hash >> 32) | 1;
     size_t idx = (size_t)hash & mask;
-    for (so_int p = 0;; p++) {
+    for (int64_t p = 0;; p++) {
         if (p >= m->cap)
             so_panic("map: out of capacity");
         if (!m->used[idx]) {
@@ -728,9 +728,9 @@ static inline void so_map_set_impl(so_Map* m, const void* key, size_t key_size,
 
 // make_map creates a zero-initialized map on the stack.
 #define so_make_map(K, V, n) ({                   \
-    so_int _n = (n);                              \
+    int64_t _n = (n);                              \
     assert(_n != 0 && "map: zero capacity");      \
-    so_int _cap = so_map_cap(_n);                 \
+    int64_t _cap = so_map_cap(_n);                 \
     size_t _ksz = sizeof(K) * (size_t)_cap;       \
     size_t _vsz = sizeof(V) * (size_t)_cap;       \
     size_t _usz = sizeof(uint8_t) * (size_t)_cap; \
@@ -784,11 +784,11 @@ static inline void so_map_set_impl(so_Map* m, const void* key, size_t key_size,
 
 // map_lit creates a map from literal key/value arrays.
 #define so_map_lit(K, V, n, keys, vals) ({                     \
-    so_int _ml_n = (n);                                        \
+    int64_t _ml_n = (n);                                        \
     so_Map* _ml_m = so_make_map(K, V, _ml_n);                  \
     K* _ml_ks = (keys);                                        \
     V* _ml_vs = (vals);                                        \
-    for (so_int _ml_i = 0; _ml_i < _ml_n; _ml_i++)             \
+    for (int64_t _ml_i = 0; _ml_i < _ml_n; _ml_i++)             \
         so_map_set(K, V, _ml_m, _ml_ks[_ml_i], _ml_vs[_ml_i]); \
     _ml_m;                                                     \
 })
