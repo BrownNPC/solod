@@ -11,6 +11,8 @@
 // [unicode/utf8]: https://github.com/golang/go/blob/go1.26.1/src/unicode/utf8/utf8.go
 package utf8
 
+import "unsafe"
+
 // The conditions RuneError==unicode.ReplacementChar and
 // MaxRune==unicode.MaxRune are verified in the tests.
 // Defining them locally avoids this package depending on package unicode.
@@ -480,7 +482,7 @@ func RuneCountInString(s string) int {
 // bits set to 10.
 func RuneStart(b byte) bool { return (b & 0xC0) != 0x80 }
 
-const ptrSize = 4 << (^uintptr(0) >> 63)
+const ptrSize = int(unsafe.Sizeof(uintptr(0)))
 const hiBits = 0x8080808080808080 >> (64 - 8*ptrSize)
 
 func wordSlice(s []byte) uintptr {

@@ -84,7 +84,7 @@ typedef struct {
 } so_String;
 
 // strlit creates a String from a string literal.
-#define so_str(s) ((so_String){s, (int64_t)(sizeof(s) - 1)})
+#define so_str(s) ((so_String){s, (sizeof(s) - 1)})
 
 // cstr returns a null-terminated C string copy on the stack.
 #define so_cstr(s) ({                                     \
@@ -98,8 +98,8 @@ typedef struct {
 // string_slice creates a substring [from, to).
 #define so_string_slice(s, from, to) ({       \
     so_String _s = (s);                       \
-    int64_t _from = (int64_t)(from);            \
-    int64_t _to = (int64_t)(to);                \
+    int64_t _from = (from);            \
+    int64_t _to = (to);                \
     assert((_to <= _s.len && _from <= _to) && \
            "slice bounds out of range");      \
     (so_String){_s.ptr + _from, _to - _from}; \
@@ -155,7 +155,7 @@ static inline bool so_string_gte(so_String s1, so_String s2) {
 // utf8_decode decodes one UTF-8 rune from string s at byte offset i.
 // Stores the byte width in *w.
 // Returns the decoded rune, or 0xFFFD for invalid UTF-8.
-so_rune so_utf8_decode(so_String s, int64_t i, int64_t* w);
+so_rune so_utf8_decode(so_String s, so_int i, so_int * w);
 
 // --- Arrays ---
 
@@ -172,17 +172,17 @@ static inline bool so_array_ne(const void* a, const void* b, size_t size) {
 // array_slice creates a slice from a C array.
 // 'size' is the total array size (known at compile time).
 #define so_array_slice(T, arr, from, to, size) ({                \
-    int64_t _from = (int64_t)(from);                               \
-    int64_t _to = (int64_t)(to);                                   \
-    int64_t _size = (int64_t)(size);                               \
+    int64_t _from = (from);                               \
+    int64_t _to = (to);                                   \
+    int64_t _size = (size);                               \
     ((so_Slice){(T*)(arr) + _from, _to - _from, _size - _from}); \
 })
 
 // array_slice3 creates a slice from a C array with an explicit capacity.
 #define so_array_slice3(T, arr, from, to, max) ({               \
-    int64_t _from = (int64_t)(from);                              \
-    int64_t _to = (int64_t)(to);                                  \
-    int64_t _max = (int64_t)(max);                                \
+    int64_t _from = (from);                              \
+    int64_t _to = (to);                                  \
+    int64_t _max = (max);                                \
     ((so_Slice){(T*)(arr) + _from, _to - _from, _max - _from}); \
 })
 
@@ -198,7 +198,7 @@ typedef struct {
 // make_slice creates a zero-initialized slice on the stack.
 // Allocates memory on the stack until the calling function returns.
 #define so_make_slice(T, len, cap) ({     \
-    int64_t _cap = (int64_t)(cap);          \
+    int64_t _cap = (cap);          \
     size_t _n = sizeof(T) * (size_t)_cap; \
     void* _p = _n ? so_alloca(_n) : NULL; \
     if (_n) memset(_p, 0, _n);            \
@@ -209,8 +209,8 @@ typedef struct {
 // from index 'from' (inclusive) to index 'to' (exclusive).
 #define so_slice(T, s, from, to) ({                       \
     so_Slice _s = (s);                                    \
-    int64_t _from = (int64_t)(from);                        \
-    int64_t _to = (int64_t)(to);                            \
+    int64_t _from = (from);                        \
+    int64_t _to = (to);                            \
     assert((_to <= _s.cap && _from <= _to) &&             \
            "slice bounds out of range");                  \
     T* _ptr = _s.ptr == NULL ? NULL : (T*)_s.ptr + _from; \
@@ -220,9 +220,9 @@ typedef struct {
 // slice3 creates a slice from another slice with an explicit capacity.
 #define so_slice3(T, s, from, to, max) ({                      \
     so_Slice _s = (s);                                         \
-    int64_t _from = (int64_t)(from);                             \
-    int64_t _to = (int64_t)(to);                                 \
-    int64_t _max = (int64_t)(max);                               \
+    int64_t _from = (from);                             \
+    int64_t _to = (to);                                 \
+    int64_t _max = (max);                               \
     assert((_max <= _s.cap && _to <= _max && _from <= _to) &&  \
            "slice bounds out of range");                       \
     (so_Slice){(T*)_s.ptr + _from, _to - _from, _max - _from}; \
@@ -288,7 +288,7 @@ int64_t so_utf8_encode(so_rune r, char* buf);
 #define so_append(T, s, ...) ({                                   \
     so_Slice _s = (s);                                            \
     T _vals[] = {__VA_ARGS__};                                    \
-    int64_t _n = (int64_t)(sizeof(_vals) / sizeof(T));              \
+    int64_t _n = (sizeof(_vals) / sizeof(T));              \
     assert((_s.len + _n <= _s.cap) && "append: out of capacity"); \
     memcpy((T*)_s.ptr + _s.len, _vals, sizeof(_vals));            \
     _s.len += _n;                                                 \
@@ -339,7 +339,7 @@ static inline int64_t so_copy_string(so_Slice dst, so_String src) {
 #define so_at(T, s, i) (*so_at_ptr(T, s, i))
 #define so_at_ptr(T, s, i) ({                        \
     so_auto _s_at = (s);                             \
-    int64_t _i = (int64_t)(i);                         \
+    int64_t _i = (i);                         \
     assert(_i < _s_at.len && "index out of bounds"); \
     (T*)_s_at.ptr + _i;                              \
 })
@@ -600,9 +600,9 @@ extern so_Slice os_Args;
 // buf must be a so_String array of at least argc elements (VLA on main's stack).
 static inline void so_args_init(int argc, char* argv[], so_String* buf) {
     for (int i = 0; i < argc; i++) {
-        buf[i] = (so_String){argv[i], (int64_t)strlen(argv[i])};
+        buf[i] = (so_String){argv[i], strlen(argv[i])};
     }
-    os_Args = (so_Slice){buf, (int64_t)argc, (int64_t)argc};
+    os_Args = (so_Slice){buf, argc, argc};
 }
 
 // --- Map type ---
