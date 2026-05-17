@@ -3,7 +3,6 @@ package main
 import "solod.dev/so/time"
 
 func times() {
-	buf := make([]byte, 64)
 	{
 		// time.Date and time.Time properties.
 		t := time.Date(2021, time.May, 10, 12, 33, 44, 777888999, time.UTC)
@@ -36,6 +35,7 @@ func times() {
 		if t.IsZero() {
 			panic("unexpected Time.IsZero")
 		}
+		buf := make([]byte, time.RFC3339NanoLen)
 		println("UTC:", t.String(buf))
 		utc5 := time.Offset(5 * 3600)
 		println("UTC+5:", t.Format(buf, time.RFC3339Nano, utc5))

@@ -8,7 +8,7 @@
 // The most common numeric conversions are [Atoi] (string to int) and [Itoa] (int to string).
 //
 //	i, err := strconv.Atoi("-42")
-//	buf := make([]byte, 64)
+//	buf := make([]byte, strconv.MaxIntBase10Len)
 //	s := strconv.Itoa(buf, -42)
 //
 // These assume decimal and the Go int type.
@@ -31,7 +31,7 @@
 //
 // [FormatBool], [FormatFloat], [FormatInt], and [FormatUint] convert values to strings:
 //
-//	buf := make([]byte, 64)
+//	buf := make([]byte, strconv.MaxFloat64Len)
 //	s := strconv.FormatBool(true)
 //	s := strconv.FormatFloat(buf, 3.1415, 'E', -1, 64)
 //	s := strconv.FormatInt(buf, -42, 16)

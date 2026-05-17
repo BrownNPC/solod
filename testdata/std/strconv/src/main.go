@@ -5,43 +5,46 @@ import (
 )
 
 func main() {
-	buf := make([]byte, 64)
 	{
 		// AppendBool.
-		b := strconv.AppendBool(buf[:0], true)
+		buf := make([]byte, 0, strconv.MaxBoolLen)
+		b := strconv.AppendBool(buf, true)
 		if string(b) != "true" {
 			panic("AppendBool")
 		}
 	}
 	{
 		// AppendFloat.
-		b := strconv.AppendFloat(buf[:0], 3.1415926535, 'E', -1, 32)
+		buf := make([]byte, 0, strconv.MaxFloat64Len)
+		b := strconv.AppendFloat(buf, 3.1415926535, 'E', -1, 32)
 		if string(b) != "3.1415927E+00" {
 			panic("AppendFloat 32")
 		}
-		b = strconv.AppendFloat(buf[:0], 3.1415926535, 'E', -1, 64)
+		b = strconv.AppendFloat(buf, 3.1415926535, 'E', -1, 64)
 		if string(b) != "3.1415926535E+00" {
 			panic("AppendFloat 64")
 		}
 	}
 	{
 		// AppendInt.
-		b := strconv.AppendInt(buf[:0], -42, 10)
+		buf := make([]byte, 0, strconv.MaxIntBase10Len)
+		b := strconv.AppendInt(buf, -42, 10)
 		if string(b) != "-42" {
 			panic("AppendInt base 10")
 		}
-		b = strconv.AppendInt(buf[:0], -42, 16)
+		b = strconv.AppendInt(buf, -42, 16)
 		if string(b) != "-2a" {
 			panic("AppendInt base 16")
 		}
 	}
 	{
 		// AppendUint.
-		b := strconv.AppendUint(buf[:0], 42, 10)
+		buf := make([]byte, 0, strconv.MaxUintBase10Len)
+		b := strconv.AppendUint(buf, 42, 10)
 		if string(b) != "42" {
 			panic("AppendUint base 10")
 		}
-		b = strconv.AppendUint(buf[:0], 42, 16)
+		b = strconv.AppendUint(buf, 42, 16)
 		if string(b) != "2a" {
 			panic("AppendUint base 16")
 		}
@@ -75,6 +78,7 @@ func main() {
 	}
 	{
 		// FormatFloat.
+		buf := make([]byte, strconv.MaxFloat64Len)
 		s := strconv.FormatFloat(buf, 3.1415926535, 'E', -1, 32)
 		if s != "3.1415927E+00" {
 			panic("FormatFloat 32")
@@ -94,6 +98,7 @@ func main() {
 	}
 	{
 		// FormatInt.
+		buf := make([]byte, strconv.MaxIntBase10Len)
 		s := strconv.FormatInt(buf, -42, 10)
 		if s != "-42" {
 			panic("FormatInt base 10")
@@ -117,6 +122,7 @@ func main() {
 	}
 	{
 		// FormatUint.
+		buf := make([]byte, strconv.MaxUintBase10Len)
 		s := strconv.FormatUint(buf, 42, 10)
 		if s != "42" {
 			panic("FormatUint base 10")
@@ -128,6 +134,7 @@ func main() {
 	}
 	{
 		// Itoa.
+		buf := make([]byte, strconv.MaxIntBase10Len)
 		s := strconv.Itoa(buf, 10)
 		if s != "10" {
 			panic("Itoa")
@@ -145,6 +152,7 @@ func main() {
 	}
 	{
 		// ParseFloat.
+		buf := make([]byte, strconv.MaxFloat64Len)
 		s, err := strconv.ParseFloat("3.1415926535", 32)
 		if err != nil {
 			panic("ParseFloat 32 error")

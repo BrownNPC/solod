@@ -9,6 +9,9 @@ package time
 // largest representable duration to approximately 290 years.
 type Duration int64
 
+// Maximum length of a duration string.
+const MaxDurationLen = 25 // -2562047h47m16.854775808s
+
 const (
 	minDuration Duration = Duration(^int64(^uint64(0) >> 1)) // -1 << 63
 	maxDuration Duration = Duration(int64(^uint64(0) >> 1))  // 1<<63 - 1
@@ -39,7 +42,7 @@ const (
 // Leading zero units are omitted. As a special case, durations less than one
 // second format use a smaller unit (milli-, micro-, or nanoseconds) to ensure
 // that the leading digit is non-zero. The zero duration formats as 0s.
-// buf must have a length of at least 25 bytes.
+// buf must have a length of at least [MaxDurationLen] bytes.
 func (d Duration) String(buf []byte) string {
 	var local [32]byte
 	n := d.format(&local)

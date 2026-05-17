@@ -8,10 +8,10 @@ static void times(void);
 // -- format.go --
 
 static void format(void) {
-    so_Slice buf = so_make_slice(so_byte, 64, 64);
     time_Time t = time_Date(2024, time_March, 15, 14, 30, 45, 0, time_UTC);
     {
         // RFC3339.
+        so_Slice buf = so_make_slice(so_byte, time_RFC3339Len, time_RFC3339Len);
         so_String s = time_Time_Format(t, buf, time_RFC3339, time_UTC);
         if (so_string_ne(s, so_str("2024-03-15T14:30:45Z"))) {
             so_panic("unexpected RFC3339 format");
@@ -19,6 +19,7 @@ static void format(void) {
     }
     {
         // RFC3339Nano.
+        so_Slice buf = so_make_slice(so_byte, time_RFC3339NanoLen, time_RFC3339NanoLen);
         t = time_Date(2024, time_March, 15, 14, 30, 45, 123456789, time_UTC);
         so_String s = time_Time_Format(t, buf, time_RFC3339Nano, time_UTC);
         if (so_string_ne(s, so_str("2024-03-15T14:30:45.123456789Z"))) {
@@ -27,6 +28,7 @@ static void format(void) {
     }
     {
         // DateTime.
+        so_Slice buf = so_make_slice(so_byte, time_DateTimeLen, time_DateTimeLen);
         so_String s = time_Time_Format(t, buf, time_DateTime, time_UTC);
         if (so_string_ne(s, so_str("2024-03-15 14:30:45"))) {
             so_panic("unexpected DateTime format");
@@ -34,6 +36,7 @@ static void format(void) {
     }
     {
         // DateOnly.
+        so_Slice buf = so_make_slice(so_byte, time_DateOnlyLen, time_DateOnlyLen);
         so_String s = time_Time_Format(t, buf, time_DateOnly, time_UTC);
         if (so_string_ne(s, so_str("2024-03-15"))) {
             so_panic("unexpected DateOnly format");
@@ -41,6 +44,7 @@ static void format(void) {
     }
     {
         // TimeOnly.
+        so_Slice buf = so_make_slice(so_byte, time_TimeOnlyLen, time_TimeOnlyLen);
         so_String s = time_Time_Format(t, buf, time_TimeOnly, time_UTC);
         if (so_string_ne(s, so_str("14:30:45"))) {
             so_panic("unexpected TimeOnly format");
@@ -48,6 +52,7 @@ static void format(void) {
     }
     {
         // Custom format.
+        so_Slice buf = so_make_slice(so_byte, so_len(so_str("15.03.2024")) + 1, so_len(so_str("15.03.2024")) + 1);
         so_String s = time_Time_Format(t, buf, so_str("%d.%m.%Y"), time_UTC);
         if (so_string_ne(s, so_str("15.03.2024"))) {
             so_panic("unexpected custom format");
@@ -55,6 +60,7 @@ static void format(void) {
     }
     {
         // Time.String.
+        so_Slice buf = so_make_slice(so_byte, time_RFC3339Len, time_RFC3339Len);
         so_String s = time_Time_String(t, buf);
         if (so_string_ne(s, so_str("2024-03-15T14:30:45Z"))) {
             so_panic("unexpected String format");
@@ -262,7 +268,6 @@ static void parse(void) {
 // -- time.go --
 
 static void times(void) {
-    so_Slice buf = so_make_slice(so_byte, 64, 64);
     {
         // time.Date and time.Time properties.
         time_Time t = time_Date(2021, time_May, 10, 12, 33, 44, 777888999, time_UTC);
@@ -295,6 +300,7 @@ static void times(void) {
         if (time_Time_IsZero(t)) {
             so_panic("unexpected Time.IsZero");
         }
+        so_Slice buf = so_make_slice(so_byte, time_RFC3339NanoLen, time_RFC3339NanoLen);
         so_println("%s %.*s", "UTC:", time_Time_String(t, buf).len, time_Time_String(t, buf).ptr);
         time_Offset utc5 = (time_Offset)(5 * 3600);
         so_println("%s %.*s", "UTC+5:", time_Time_Format(t, buf, time_RFC3339Nano, utc5).len, time_Time_Format(t, buf, time_RFC3339Nano, utc5).ptr);

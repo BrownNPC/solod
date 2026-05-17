@@ -3,43 +3,46 @@
 // -- Implementation --
 
 int main(void) {
-    so_Slice buf = so_make_slice(so_byte, 64, 64);
     {
         // AppendBool.
-        so_Slice b = strconv_AppendBool(so_slice(so_byte, buf, 0, 0), true);
+        so_Slice buf = so_make_slice(so_byte, 0, strconv_MaxBoolLen);
+        so_Slice b = strconv_AppendBool(buf, true);
         if (so_string_ne(so_bytes_string(b), so_str("true"))) {
             so_panic("AppendBool");
         }
     }
     {
         // AppendFloat.
-        so_Slice b = strconv_AppendFloat(so_slice(so_byte, buf, 0, 0), 3.1415926535, 'E', -1, 32);
+        so_Slice buf = so_make_slice(so_byte, 0, strconv_MaxFloat64Len);
+        so_Slice b = strconv_AppendFloat(buf, 3.1415926535, 'E', -1, 32);
         if (so_string_ne(so_bytes_string(b), so_str("3.1415927E+00"))) {
             so_panic("AppendFloat 32");
         }
-        b = strconv_AppendFloat(so_slice(so_byte, buf, 0, 0), 3.1415926535, 'E', -1, 64);
+        b = strconv_AppendFloat(buf, 3.1415926535, 'E', -1, 64);
         if (so_string_ne(so_bytes_string(b), so_str("3.1415926535E+00"))) {
             so_panic("AppendFloat 64");
         }
     }
     {
         // AppendInt.
-        so_Slice b = strconv_AppendInt(so_slice(so_byte, buf, 0, 0), -42, 10);
+        so_Slice buf = so_make_slice(so_byte, 0, strconv_MaxIntBase10Len);
+        so_Slice b = strconv_AppendInt(buf, -42, 10);
         if (so_string_ne(so_bytes_string(b), so_str("-42"))) {
             so_panic("AppendInt base 10");
         }
-        b = strconv_AppendInt(so_slice(so_byte, buf, 0, 0), -42, 16);
+        b = strconv_AppendInt(buf, -42, 16);
         if (so_string_ne(so_bytes_string(b), so_str("-2a"))) {
             so_panic("AppendInt base 16");
         }
     }
     {
         // AppendUint.
-        so_Slice b = strconv_AppendUint(so_slice(so_byte, buf, 0, 0), 42, 10);
+        so_Slice buf = so_make_slice(so_byte, 0, strconv_MaxUintBase10Len);
+        so_Slice b = strconv_AppendUint(buf, 42, 10);
         if (so_string_ne(so_bytes_string(b), so_str("42"))) {
             so_panic("AppendUint base 10");
         }
-        b = strconv_AppendUint(so_slice(so_byte, buf, 0, 0), 42, 16);
+        b = strconv_AppendUint(buf, 42, 16);
         if (so_string_ne(so_bytes_string(b), so_str("2a"))) {
             so_panic("AppendUint base 16");
         }
@@ -77,6 +80,7 @@ int main(void) {
     }
     {
         // FormatFloat.
+        so_Slice buf = so_make_slice(so_byte, strconv_MaxFloat64Len, strconv_MaxFloat64Len);
         so_String s = strconv_FormatFloat(buf, 3.1415926535, 'E', -1, 32);
         if (so_string_ne(s, so_str("3.1415927E+00"))) {
             so_panic("FormatFloat 32");
@@ -96,6 +100,7 @@ int main(void) {
     }
     {
         // FormatInt.
+        so_Slice buf = so_make_slice(so_byte, strconv_MaxIntBase10Len, strconv_MaxIntBase10Len);
         so_String s = strconv_FormatInt(buf, -42, 10);
         if (so_string_ne(s, so_str("-42"))) {
             so_panic("FormatInt base 10");
@@ -119,6 +124,7 @@ int main(void) {
     }
     {
         // FormatUint.
+        so_Slice buf = so_make_slice(so_byte, strconv_MaxUintBase10Len, strconv_MaxUintBase10Len);
         so_String s = strconv_FormatUint(buf, 42, 10);
         if (so_string_ne(s, so_str("42"))) {
             so_panic("FormatUint base 10");
@@ -130,6 +136,7 @@ int main(void) {
     }
     {
         // Itoa.
+        so_Slice buf = so_make_slice(so_byte, strconv_MaxIntBase10Len, strconv_MaxIntBase10Len);
         so_String s = strconv_Itoa(buf, 10);
         if (so_string_ne(s, so_str("10"))) {
             so_panic("Itoa");
@@ -149,6 +156,7 @@ int main(void) {
     }
     {
         // ParseFloat.
+        so_Slice buf = so_make_slice(so_byte, strconv_MaxFloat64Len, strconv_MaxFloat64Len);
         so_R_f64_err _res4 = strconv_ParseFloat(so_str("3.1415926535"), 32);
         double s = _res4.val;
         so_Error err = _res4.err;

@@ -4,6 +4,9 @@
 
 package strconv
 
+// Maximum length of a boolean string ("true" or "false").
+const MaxBoolLen = 5
+
 // ParseBool returns the boolean value represented by the string.
 // It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
 // Any other value returns an error.

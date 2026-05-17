@@ -11,6 +11,12 @@ import (
 	"solod.dev/so/time"
 )
 
+// MaxPathLen is the maximum length of a path.
+const MaxPathLen = 4096
+
+// MaxNameLen is the maximum length of a filename.
+const MaxNameLen = 256
+
 // IO-related errors that can be returned by functions in this package.
 var ErrClosed = errors.New("os: file already closed")
 var ErrExist = errors.New("os: file already exists")

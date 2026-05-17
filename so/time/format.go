@@ -15,9 +15,19 @@ const (
 	TimeOnly    = "%H:%M:%S"
 )
 
+// Lengths of the common date/time layouts.
+const (
+	RFC3339Len     = 25 // 2006-01-02T15:04:05+07:00
+	RFC3339NanoLen = 35 // 2006-01-02T15:04:05.999999999+07:00
+	DateTimeLen    = 19 // 2006-01-02 15:04:05
+	DateOnlyLen    = 10 // 2006-01-02
+	TimeOnlyLen    = 8  // 15:04:05
+)
+
 // Format formats the time per layout (strftime verbs like "%Y-%m-%d"),
 // writing into buf. Returns the formatted string (a view into buf).
-// buf length must be large enough for the formatted output plus a null terminator.
+// buf length must be large enough for the formatted output
+// (see [RFC3339Len], etc. for common layouts).
 func (t Time) Format(buf []byte, layout string, offset Offset) string {
 	sec := t.absSec() + absSeconds(offset)
 	days := absSeconds_days(sec)
@@ -83,7 +93,7 @@ func (t Time) Format(buf []byte, layout string, offset Offset) string {
 
 // String formats the time as ISO 8601 "2006-01-02T15:04:05Z",
 // writing into buf. Returns the formatted string (a view into buf).
-// buf must have a length of at least 21 bytes.
+// buf length must be at least [RFC3339Len] bytes.
 func (t Time) String(buf []byte) string {
 	return t.Format(buf, RFC3339, UTC)
 }

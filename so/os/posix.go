@@ -7,12 +7,6 @@ import "solod.dev/so/c"
 //so:include.c <sys/stat.h>
 //so:include.c <unistd.h>
 
-// MaxPathLen is the maximum length of a path.
-const MaxPathLen = 4096
-
-// MaxNameLen is the maximum length of a filename.
-const MaxNameLen = 256
-
 //so:extern S_IFMT
 const sIFMT = 0170000 // type of file mask
 //so:extern S_IFIFO
