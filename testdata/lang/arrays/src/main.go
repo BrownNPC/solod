@@ -14,6 +14,13 @@ func at(a [3]int, i int) int {
 	return a[i]
 }
 
+func reverse(a [3]int) [3]int {
+	tmp := a[0]
+	a[0] = a[2]
+	a[2] = tmp
+	return a
+}
+
 func newBox() box {
 	return box{
 		nums: [3]int{11, 22, 33},
@@ -83,6 +90,14 @@ func main() {
 		v1 := at([3]int{11, 22, 33}, 1)
 		if v1 != 22 {
 			panic("want at([11, 22, 33], 1) == 22")
+		}
+	}
+	{
+		// Returning arrays from functions.
+		a := [3]int{1, 2, 3}
+		a = reverse(a)
+		if a[0] != 3 || a[1] != 2 || a[2] != 1 {
+			panic("want reverse({1, 2, 3}) == {3, 2, 1}")
 		}
 	}
 	{

@@ -18,6 +18,7 @@ typedef struct arange {
 // -- Forward declarations --
 static void change(so_int a[3]);
 static so_int at(so_int a[3], so_int i);
+static so_int* reverse(so_int a[3]);
 static box newBox(void);
 
 // -- Variables and constants --
@@ -31,6 +32,13 @@ static void change(so_int a[3]) {
 
 static so_int at(so_int a[3], so_int i) {
     return a[i];
+}
+
+static so_int* reverse(so_int a[3]) {
+    so_int tmp = a[0];
+    a[0] = a[2];
+    a[2] = tmp;
+    return a;
 }
 
 static box newBox(void) {
@@ -83,6 +91,14 @@ int main(void) {
         so_int v1 = at((so_int[3]){11, 22, 33}, 1);
         if (v1 != 22) {
             so_panic("want at([11, 22, 33], 1) == 22");
+        }
+    }
+    {
+        // Returning arrays from functions.
+        so_int a[3] = {1, 2, 3};
+        memcpy(a, reverse(a), sizeof(a));
+        if (a[0] != 3 || a[1] != 2 || a[2] != 1) {
+            so_panic("want reverse({1, 2, 3}) == {3, 2, 1}");
         }
     }
     {

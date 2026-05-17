@@ -84,15 +84,18 @@ func (g *Generator) returnType(node ast.Node, sig *types.Signature) string {
 	}
 	if sig.Results().Len() == 1 {
 		ret := sig.Results().At(0).Type()
-		if _, ok := ret.Underlying().(*types.Array); ok {
-			g.fail(node, "returning arrays from functions is not supported")
+		if arr, ok := ret.Underlying().(*types.Array); ok {
+			if _, ok := arr.Elem().(*types.Array); ok {
+				g.fail(node, "returning multi-dimensional arrays is not supported")
+			}
+			return g.mapType(node, arr) + "*"
 		}
 		if _, ok := ret.Underlying().(*types.Map); ok {
-			g.fail(node, "returning maps from functions is not supported")
+			g.fail(node, "returning maps is not supported")
 		}
 		if ptr, ok := ret.Underlying().(*types.Pointer); ok {
 			if _, ok := ptr.Elem().Underlying().(*types.Array); ok {
-				g.fail(node, "returning pointer-to-array from functions is not supported")
+				g.fail(node, "returning pointer-to-array is not supported")
 			}
 		}
 		return g.mapType(node, ret)
