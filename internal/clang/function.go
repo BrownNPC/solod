@@ -274,13 +274,19 @@ func (g *Generator) emitFuncCall(call *ast.CallExpr) {
 		g.emitExpr(call.Fun)
 	}
 
-	// Emit arguments, wrapping as interfaces if needed.
+	fmt.Fprintf(w, "(")
+	g.emitFuncCallArgs(call)
+	fmt.Fprintf(w, ")")
+}
+
+// emitFuncCallArgs emits the arguments for a function call.
+func (g *Generator) emitFuncCallArgs(call *ast.CallExpr) {
+	w := g.state.writer
 	var sig *types.Signature
 	if funType := g.types.TypeOf(call.Fun); funType != nil {
 		// Get the function signature to wrap value arguments as interfaces if needed.
 		sig, _ = funType.Underlying().(*types.Signature)
 	}
-	fmt.Fprintf(w, "(")
 
 	if ext, ok := g.callExtern(call); ok && !ext.nodecay {
 		// Extern C call: decay all args to C-compatible types.
@@ -290,27 +296,33 @@ func (g *Generator) emitFuncCall(call *ast.CallExpr) {
 			g.fail(call, "spreading variadic arguments to an extern function is not supported")
 		}
 		g.emitCArgs(call)
-	} else if sig != nil && sig.Variadic() && !call.Ellipsis.IsValid() {
+		return
+	}
+
+	if sig != nil && sig.Variadic() && !call.Ellipsis.IsValid() {
 		// Variadic call with individual args: pack trailing args into a slice literal.
 		g.emitFixedArgs(call, sig)
 		g.emitVariadicArgs(call, sig)
-	} else {
-		// Regular call: emit all args as-is.
-		for i, arg := range call.Args {
-			if i > 0 {
-				fmt.Fprintf(w, ", ")
-			}
-			if sig != nil && i < sig.Params().Len() {
-				// Emit arg, wrapping as interface if needed based on parameter type.
-				g.emitExprAsType(call, arg, sig.Params().At(i).Type())
-			} else {
-				// No signature available (e.g. func literal), emit arg as-is.
-				g.emitExpr(arg)
-			}
-		}
+		return
 	}
 
-	fmt.Fprintf(w, ")")
+	// Regular call: emit all args as-is.
+	for i, arg := range call.Args {
+		if i > 0 {
+			fmt.Fprintf(w, ", ")
+		}
+		if sig != nil && i < sig.Params().Len() {
+			paramType := sig.Params().At(i).Type()
+			if arr, ok := paramType.Underlying().(*types.Array); ok {
+				g.emitArrayArg(call, arg, arr)
+			} else {
+				g.emitExprAsType(call, arg, paramType)
+			}
+		} else {
+			// No signature available (e.g. func literal), emit arg as-is.
+			g.emitExpr(arg)
+		}
+	}
 }
 
 // emitFixedArgs emits the non-variadic arguments for a variadic call.

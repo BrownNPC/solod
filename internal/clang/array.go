@@ -26,6 +26,19 @@ func (g *Generator) emitArrayLit(n *ast.CompositeLit) {
 	fmt.Fprintf(w, "}")
 }
 
+// emitArrayArg emits an array expression as a function argument.
+// Composite literals need compound literal syntax (e.g. (so_int[3]){11, 22, 33}).
+func (g *Generator) emitArrayArg(node ast.Node, arg ast.Expr, arr *types.Array) {
+	w := g.state.writer
+	if _, isLit := arg.(*ast.CompositeLit); isLit {
+		elemType := g.mapType(node, arr.Elem())
+		fmt.Fprintf(w, "(%s%s)", elemType, arrayDims(arr))
+		g.emitExpr(arg)
+		return
+	}
+	g.emitExpr(arg)
+}
+
 // emitArrayCmpOperand emits an array comparison operand.
 // Composite literals need a C compound literal prefix (e.g. (so_int[3]){...})
 // wrapped in extra parentheses so commas inside braces don't split macro args.

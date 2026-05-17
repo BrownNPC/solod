@@ -17,6 +17,7 @@ typedef struct arange {
 
 // -- Forward declarations --
 static void change(so_int a[3]);
+static so_int at(so_int a[3], so_int i);
 static box newBox(void);
 
 // -- Variables and constants --
@@ -26,6 +27,10 @@ static arange aranges[16] = {[0] = (arange){0x10, 0x20}, [1] = (arange){0x30, 0x
 
 static void change(so_int a[3]) {
     a[0] = 42;
+}
+
+static so_int at(so_int a[3], so_int i) {
+    return a[i];
 }
 
 static box newBox(void) {
@@ -69,11 +74,15 @@ int main(void) {
         }
     }
     {
-        // Arrays decay to pointers when passed to functions.
+        // Passing arrays to functions.
         so_int a[3] = {1, 2, 3};
         change(a);
         if (a[0] != 42) {
             so_panic("want a[0] == 42");
+        }
+        so_int v1 = at((so_int[3]){11, 22, 33}, 1);
+        if (v1 != 22) {
+            so_panic("want at([11, 22, 33], 1) == 22");
         }
     }
     {

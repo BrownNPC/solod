@@ -10,6 +10,10 @@ func change(a [3]int) {
 	a[0] = 42
 }
 
+func at(a [3]int, i int) int {
+	return a[i]
+}
+
 func newBox() box {
 	return box{
 		nums: [3]int{11, 22, 33},
@@ -69,11 +73,16 @@ func main() {
 		}
 	}
 	{
-		// Arrays decay to pointers when passed to functions.
+		// Passing arrays to functions.
 		a := [3]int{1, 2, 3}
 		change(a)
 		if a[0] != 42 {
 			panic("want a[0] == 42")
+		}
+
+		v1 := at([3]int{11, 22, 33}, 1)
+		if v1 != 22 {
+			panic("want at([11, 22, 33], 1) == 22")
 		}
 	}
 	{
