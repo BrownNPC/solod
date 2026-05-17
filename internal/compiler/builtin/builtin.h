@@ -242,6 +242,13 @@ static inline bool so_array_ne(const void* a, const void* b, size_t size) {
     return memcmp(a, b, size) != 0;
 }
 
+// slice_array converts a slice to an array pointer with bounds checking.
+#define so_slice_array(s, n) ({                                 \
+    so_Slice _s = (s);                                          \
+    assert(_s.len >= (so_int)(n) && "slice-to-array mismatch"); \
+    _s.ptr;                                                     \
+})
+
 // array_slice creates a slice from a C array.
 // 'size' is the total array size (known at compile time).
 #define so_array_slice(T, arr, from, to, size) ({                \

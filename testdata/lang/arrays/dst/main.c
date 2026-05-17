@@ -230,6 +230,19 @@ int main(void) {
             so_panic("want a != c");
         }
     }
+    {
+        // Slice-to-array conversion.
+        so_Slice s = (so_Slice){(so_int[3]){11, 22, 33}, 3, 3};
+        so_int a[3];
+        memcpy(a, so_slice_array(s, 3), sizeof(a));
+        if (a[0] != 11 || a[1] != 22 || a[2] != 33) {
+            so_panic("want a == {11, 22, 33}");
+        }
+        so_int v1 = at(so_slice_array(s, 3), 1);
+        if (v1 != 22) {
+            so_panic("want at([11, 22, 33], 1) == 22");
+        }
+    }
     (void)aranges;
     return 0;
 }

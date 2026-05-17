@@ -275,6 +275,17 @@ func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 				}
 			}
 		}
+		// Slice-to-array conversion (e.g. [3]int(s)). Unlike in Go, it doesn't
+		// allocate a new array. Instead, it returns a pointer to the slice data.
+		if arrType, ok := tv.Type.Underlying().(*types.Array); ok {
+			argType := g.types.TypeOf(n.Args[0])
+			if _, ok := argType.Underlying().(*types.Slice); ok {
+				fmt.Fprintf(w, "so_slice_array(")
+				g.emitExpr(n.Args[0])
+				fmt.Fprintf(w, ", %d)", arrType.Len())
+				return
+			}
+		}
 		// Regular type conversion (e.g. int(3.14)).
 		cType := g.mapType(n, tv.Type)
 		fmt.Fprintf(w, "(%s)", cType)

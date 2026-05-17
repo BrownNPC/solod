@@ -231,5 +231,17 @@ func main() {
 			panic("want a != c")
 		}
 	}
+	{
+		// Slice-to-array conversion.
+		s := []int{11, 22, 33}
+		a := [3]int(s)
+		if a[0] != 11 || a[1] != 22 || a[2] != 33 {
+			panic("want a == {11, 22, 33}")
+		}
+		v1 := at([3]int(s), 1)
+		if v1 != 22 {
+			panic("want at([11, 22, 33], 1) == 22")
+		}
+	}
 	_ = aranges
 }
