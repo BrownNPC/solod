@@ -190,4 +190,17 @@ func main() {
 			panic("multiple assignment failed")
 		}
 	}
+	{
+		// Variable shadowing.
+		age := 30
+		p := person{age: age}
+		{
+			age := p.age
+			_ = age
+		}
+		{
+			age := person{age: 40}
+			_ = age
+		}
+	}
 }

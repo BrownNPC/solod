@@ -73,11 +73,26 @@ func (g *Generator) emitDefine(stmt *ast.AssignStmt) {
 			return
 		}
 	}
+	// Detect self-shadowing - a variable x is defined using a variable with
+	// the same name from an outer scope, eg. `x := x + 1`. C does not support
+	// this (the right-hand x refers to the new variable, not the outer one).
+	rhsNames := collectIdents(stmt.Rhs...)
+	for _, lhs := range stmt.Lhs {
+		ident, ok := lhs.(*ast.Ident)
+		if !ok || ident.Name == "_" {
+			continue
+		}
+		if g.types.Defs[ident] == nil {
+			continue
+		}
+		if rhsNames[ident.Name] {
+			g.fail(stmt, "self-shadowing variable %q is not supported", ident.Name)
+		}
+	}
 	// Detect LHS/RHS variable overlap in multi-assignments.
 	// Eg. `a, b = x, y` is fine, but `a, b = b, a` is not.
 	if len(stmt.Lhs) > 1 && len(stmt.Rhs) > 1 {
 		lhsNames := collectIdents(stmt.Lhs...)
-		rhsNames := collectIdents(stmt.Rhs...)
 		for name := range rhsNames {
 			if lhsNames[name] {
 				g.fail(stmt, "multiple assignment with LHS/RHS variable overlap is not supported")
@@ -245,13 +260,29 @@ func (g *Generator) emitAssign(stmt *ast.AssignStmt) {
 // The blank identifier is excluded.
 func collectIdents(exprs ...ast.Expr) map[string]bool {
 	names := map[string]bool{}
-	for _, expr := range exprs {
-		ast.Inspect(expr, func(n ast.Node) bool {
-			if ident, ok := n.(*ast.Ident); ok && ident.Name != "_" {
-				names[ident.Name] = true
+	var visit func(ast.Node) bool
+	visit = func(n ast.Node) bool {
+		switch n := n.(type) {
+		case *ast.Ident:
+			if n.Name != "_" {
+				names[n.Name] = true
 			}
-			return true
-		})
+		case *ast.KeyValueExpr:
+			// Only recurse into Value, skip Key (struct field names
+			// are not variable references; map key variables are
+			// also skipped but self-shadowing there is unlikely).
+			ast.Inspect(n.Value, visit)
+			return false
+		case *ast.SelectorExpr:
+			// Only recurse into X, skip Sel (field/method names
+			// are not variable references).
+			ast.Inspect(n.X, visit)
+			return false
+		}
+		return true
+	}
+	for _, expr := range exprs {
+		ast.Inspect(expr, visit)
 	}
 	return names
 }

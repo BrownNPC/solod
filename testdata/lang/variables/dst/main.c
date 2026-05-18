@@ -205,5 +205,18 @@ int main(void) {
             so_panic("multiple assignment failed");
         }
     }
+    {
+        // Variable shadowing.
+        so_int age = 30;
+        person p = (person){.age = age};
+        {
+            so_int age = p.age;
+            (void)age;
+        }
+        {
+            person age = (person){.age = 40};
+            (void)age;
+        }
+    }
     return 0;
 }

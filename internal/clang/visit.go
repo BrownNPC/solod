@@ -307,6 +307,19 @@ func (g *Generator) emitConstVal(node ast.Node, name *ast.Ident) {
 func (g *Generator) emitVarSpec(spec *ast.ValueSpec, dirs directives) {
 	w := g.state.writer
 
+	// Detect self-shadowing in local variable declarations.
+	if g.state.indent > 0 && len(spec.Values) > 0 {
+		rhsNames := collectIdents(spec.Values...)
+		for _, name := range spec.Names {
+			if name.Name == "_" {
+				continue
+			}
+			if rhsNames[name.Name] {
+				g.fail(spec, "self-shadowing variable %q is not supported", name.Name)
+			}
+		}
+	}
+
 	// Local multi-variable declaration: group consecutive same-type variables,
 	// but emit separate declarations for different types
 	// (e.g. `int a = 1, b = 2; float c = 3.14;`).
