@@ -18,6 +18,10 @@ type Char byte
 //so:extern so_const_char
 type ConstChar byte
 
+// Int represents a C int type.
+//so:extern int
+type Int int
+
 // Alignof returns the alignment of type T in bytes.
 //
 //	alignof(T)
