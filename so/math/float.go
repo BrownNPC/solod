@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 package math
+import "solod.dev/so/c"
 
 // Copysign returns a value with the magnitude of f
 // and the sign of sign.
@@ -23,7 +24,7 @@ func Copysign(f, sign float64) float64 {
 //	Frexp(±Inf) = ±Inf, 0
 //	Frexp(NaN) = NaN, 0
 func Frexp(f float64) (float64, int) {
-	var exp int32
+	var exp c.Int
 	frac := frexp(f, &exp)
 	return frac, int(exp)
 }
