@@ -177,26 +177,19 @@ func (g *Generator) emitHeaderGenDecl(w io.Writer, decl *ast.GenDecl, dirs direc
 // or an empty string if the import should be ignored.
 func (g *Generator) resolveIncludePath(spec *ast.ImportSpec) string {
 	path := strings.Trim(spec.Path.Value, `"`)
-	if isIgnoredPackage(path) {
+	imp, ok := g.pkg.Imports[path]
+	if !ok {
+		g.fail(spec, "import not found: %s", path)
+	}
+	if imp.Module == nil {
+		// Ignore all Go stdlib imports (the code might
+		// only reference stdlib packages for testing).
 		return ""
 	}
 	// Strip the imported package's own module prefix.
-	if imp, ok := g.pkg.Imports[path]; ok && imp.Module != nil {
-		path = strings.TrimPrefix(path, imp.Module.Path+"/")
-	}
+	path = strings.TrimPrefix(path, imp.Module.Path+"/")
 	// Add the package.h file (e.g. package -> package/package.h).
 	parts := strings.Split(path, "/")
 	parts = append(parts, parts[len(parts)-1]+".h")
 	return strings.Join(parts, "/")
-}
-
-// isIgnoredPackage returns true if the import path is for
-// a package that should not be emitted as a #include directive.
-func isIgnoredPackage(path string) bool {
-	// embed is only a marker import for embedding files,
-	// unsafe is implemented in builtin.h,
-	// so they neither requires a #include directive.
-	// Other ignored packages are only used for extern functions in tests.
-	return path == "cmp" || path == "crypto/rand" || path == "embed" ||
-		path == "fmt" || path == "math" || path == "unsafe"
 }
