@@ -11,7 +11,7 @@ import (
 
 // emitInterfaceTypeSpec emits a typedef struct with void* self and function pointers.
 func (g *Generator) emitInterfaceTypeSpec(w io.Writer, spec *ast.TypeSpec) {
-	typ := g.types.Defs[spec.Name].Type().(*types.Named)
+	typ := types.Unalias(g.types.Defs[spec.Name].Type()).(*types.Named)
 	iface := typ.Underlying().(*types.Interface)
 	cName := g.declSymbolName(g.types.Defs[spec.Name])
 	fmt.Fprintf(w, "typedef struct %s {\n", cName)
@@ -35,7 +35,7 @@ func (g *Generator) emitInterfaceTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 // emitInterfaceLit emits a compound literal that wraps a concrete value as an interface.
 // Example: (main_Shape){.self = &r, .Area = main_Rect_Area, .Perim = main_Rect_Perim}
 func (g *Generator) emitInterfaceLit(w io.Writer, ifaceType types.Type, expr ast.Expr) {
-	named := ifaceType.(*types.Named)
+	named := types.Unalias(ifaceType).(*types.Named)
 	iface := named.Underlying().(*types.Interface)
 
 	// Get value type, dereferencing if it's a pointer.
@@ -45,7 +45,7 @@ func (g *Generator) emitInterfaceLit(w io.Writer, ifaceType types.Type, expr ast
 		concreteType = ptr.Elem()
 		isPtr = true
 	}
-	concreteNamed := concreteType.(*types.Named)
+	concreteNamed := types.Unalias(concreteType).(*types.Named)
 
 	cIface := g.mapType(expr, named)
 	cConcrete := g.mapType(expr, concreteNamed)
@@ -65,7 +65,7 @@ func (g *Generator) emitInterfaceLit(w io.Writer, ifaceType types.Type, expr ast
 // emitTypeAssertion emits a comma-ok type assertion (e.g. _, ok := s.(Rect)).
 // Uses function pointer comparison to identify the concrete type.
 func (g *Generator) emitTypeAssertion(w io.Writer, stmt *ast.AssignStmt, ta *ast.TypeAssertExpr) {
-	ifaceType := g.types.TypeOf(ta.X).(*types.Named)
+	ifaceType := types.Unalias(g.types.TypeOf(ta.X)).(*types.Named)
 	iface := ifaceType.Underlying().(*types.Interface)
 	firstMethod := iface.Method(0).Name()
 
@@ -74,7 +74,7 @@ func (g *Generator) emitTypeAssertion(w io.Writer, stmt *ast.AssignStmt, ta *ast
 	if ptr, ok := assertedType.(*types.Pointer); ok {
 		assertedType = ptr.Elem()
 	}
-	concreteNamed := assertedType.(*types.Named)
+	concreteNamed := types.Unalias(assertedType).(*types.Named)
 	cConcrete := g.mapType(ta, concreteNamed)
 
 	okIdent := stmt.Lhs[1].(*ast.Ident)
@@ -107,7 +107,7 @@ func (g *Generator) emitTypeAssertExpr(w io.Writer, n *ast.TypeAssertExpr) {
 	}
 
 	// Cast to a pointer or value type, depending on the request.
-	concreteNamed := targetType.(*types.Named)
+	concreteNamed := types.Unalias(targetType).(*types.Named)
 	cConcrete := g.mapType(n, concreteNamed)
 	if isPtr {
 		// Pointer assertion: ival.(*Type) → (Type*)ival.self
@@ -172,7 +172,7 @@ func isNamedNonEmptyInterface(t types.Type) bool {
 	if !ok || iface.Empty() {
 		return false
 	}
-	_, isNamed := t.(*types.Named)
+	_, isNamed := types.Unalias(t).(*types.Named)
 	return isNamed
 }
 
@@ -186,7 +186,7 @@ func isConcreteNamedType(t types.Type) bool {
 	if ptr, ok := t.(*types.Pointer); ok {
 		t = ptr.Elem()
 	}
-	_, ok := t.(*types.Named)
+	_, ok := types.Unalias(t).(*types.Named)
 	return ok
 }
 

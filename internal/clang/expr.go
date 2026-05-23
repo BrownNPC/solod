@@ -454,9 +454,9 @@ func (g *Generator) emitSelectorExpr(w io.Writer, n *ast.SelectorExpr) {
 		recv := selection.Recv()
 		var named *types.Named
 		if ptr, ok := recv.(*types.Pointer); ok {
-			named = ptr.Elem().(*types.Named)
+			named = types.Unalias(ptr.Elem()).(*types.Named)
 		} else {
-			named = recv.(*types.Named)
+			named = types.Unalias(recv).(*types.Named)
 		}
 		cName := g.mapType(n, named) + "_" + n.Sel.Name
 

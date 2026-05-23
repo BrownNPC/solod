@@ -8,14 +8,17 @@ typedef struct main_Person main_Person;
 typedef struct main_Benchmark main_Benchmark;
 
 // Primitive types.
-// not a different type
+// same type in C
 typedef so_int main_ID;
 
 // also int
-typedef so_int main_AliasedID;
+typedef so_int main_AlsoID;
 
 // also int
-typedef so_int main_AlsoID;
+typedef so_int main_AliasInt;
+
+// also int
+typedef so_int main_AliasID;
 typedef so_rune main_Rune;
 
 // Complex types.
@@ -46,3 +49,10 @@ typedef struct main_Benchmark {
         so_int i;
     } loop;
 } main_Benchmark;
+
+// -- Functions and methods --
+
+// Methods on aliases.
+so_int main_Person_Age(void* self);
+so_int main_ID_GetVal(main_ID aid);
+so_int main_ID_GetPtr(void* self);

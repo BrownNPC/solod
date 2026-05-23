@@ -21,12 +21,27 @@ static main_Person newPerson(so_String name) {
     return p;
 }
 
+// Methods on aliases.
+so_int main_Person_Age(void* self) {
+    main_Person* h = self;
+    return h->age;
+}
+
+so_int main_ID_GetVal(main_ID aid) {
+    return (so_int)(aid);
+}
+
+so_int main_ID_GetPtr(void* self) {
+    main_ID* aid = self;
+    return (so_int)(*aid);
+}
+
 int main(void) {
     {
         // Primitive types.
         main_ID id = 123;
         (void)id;
-        so_int aid = 456;
+        main_ID aid = 456;
         (void)aid;
         main_AlsoID alsoID = 789;
         (void)alsoID;
@@ -117,6 +132,25 @@ int main(void) {
         }
         if ((so_mem_eq(&p1, &(point){}, sizeof(point)))) {
             so_panic("p1 == point{}");
+        }
+    }
+    {
+        // Type aliases.
+        main_Person h = (main_Person){.name = so_str("Alice"), .age = 30};
+        so_int age = main_Person_Age(&h);
+        if (age != 30) {
+            so_panic("h.Age() != 30");
+        }
+        main_ID aid = (main_ID)(123);
+        if (main_ID_GetVal(aid) != 123) {
+            so_panic("aid.GetVal() != 123");
+        }
+        if (main_ID_GetPtr(&aid) != 123) {
+            so_panic("aid.GetPtr() != 123");
+        }
+        main_ID id = aid;
+        if (main_ID_GetVal(id) != 123) {
+            so_panic("id.GetVal() != 123");
         }
     }
     return 0;

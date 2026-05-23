@@ -87,7 +87,7 @@ func (g *Generator) emitFuncProto(w io.Writer, decl *ast.FuncDecl) *types.Signat
 
 // emitFuncTypeSpec emits a C function pointer typedef.
 func (g *Generator) emitFuncTypeSpec(w io.Writer, spec *ast.TypeSpec) {
-	named := g.types.Defs[spec.Name].Type().(*types.Named)
+	named := types.Unalias(g.types.Defs[spec.Name].Type()).(*types.Named)
 	sig := named.Underlying().(*types.Signature)
 
 	retType := g.returnType(spec, sig)
@@ -495,16 +495,22 @@ func (g *Generator) recvTypeObj(recv *ast.Field) types.Object {
 	if star, ok := typ.(*ast.StarExpr); ok {
 		typ = star.X
 	}
+	var obj types.Object
 	switch t := typ.(type) {
 	case *ast.Ident:
-		return g.types.Uses[t]
+		obj = g.types.Uses[t]
 	case *ast.IndexExpr:
-		return g.types.Uses[t.X.(*ast.Ident)]
+		obj = g.types.Uses[t.X.(*ast.Ident)]
 	case *ast.IndexListExpr:
-		return g.types.Uses[t.X.(*ast.Ident)]
+		obj = g.types.Uses[t.X.(*ast.Ident)]
+	default:
+		g.fail(recv, "unsupported receiver type: %T", recv.Type)
 	}
-	g.fail(recv, "unsupported receiver type: %T", recv.Type)
-	return nil // unreachable
+	// Resolve type aliases to the underlying named type.
+	if named, ok := types.Unalias(obj.Type()).(*types.Named); ok {
+		return named.Obj()
+	}
+	return obj
 }
 
 // recvTypeParams extracts type parameter names from a generic receiver field.

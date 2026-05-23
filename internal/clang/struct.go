@@ -208,9 +208,9 @@ func (g *Generator) emitMethodCall(w io.Writer, sel *ast.SelectorExpr, call *ast
 	// Get the struct type name.
 	var named *types.Named
 	if ptr, ok := recv.(*types.Pointer); ok {
-		named = ptr.Elem().(*types.Named)
+		named = types.Unalias(ptr.Elem()).(*types.Named)
 	} else {
-		named = recv.(*types.Named)
+		named = types.Unalias(recv).(*types.Named)
 	}
 
 	// Interface method dispatch: s.Perim(2) → s.Perim(s.self, 2)

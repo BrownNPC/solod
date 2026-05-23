@@ -206,7 +206,7 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 			// any (interface{}) maps to void*, so zero value is NULL.
 			return "NULL"
 		}
-		if _, ok := typ.(*types.Named); ok {
+		if _, ok := types.Unalias(typ).(*types.Named); ok {
 			// Named interfaces map to structs, so zero value is {0}.
 			return "{0}"
 		}
@@ -255,7 +255,7 @@ func (g *Generator) symbolName(obj types.Object) string {
 
 // isUnexportedType reports whether a type is unexported for the current package.
 func (g *Generator) isUnexportedType(typ types.Type) bool {
-	named, ok := typ.(*types.Named)
+	named, ok := types.Unalias(typ).(*types.Named)
 	if !ok {
 		return false
 	}
@@ -268,7 +268,7 @@ func (g *Generator) isUnexportedType(typ types.Type) bool {
 
 // isErrorType checks if a type is the built-in error interface.
 func isErrorType(typ types.Type) bool {
-	if named, ok := typ.(*types.Named); ok {
+	if named, ok := types.Unalias(typ).(*types.Named); ok {
 		return named.Obj().Name() == "error" && named.Obj().Parent() == types.Universe
 	}
 	return false

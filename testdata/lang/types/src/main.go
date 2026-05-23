@@ -1,9 +1,10 @@
 package main
 
 // Primitive types.
-type ID int          // not a different type
-type AliasedID = int // also int
-type AlsoID ID       // also int
+type ID int         // same type in C
+type AlsoID ID      // also int
+type AliasInt = int // also int
+type AliasID = ID   // also int
 type Rune rune
 
 // Complex types.
@@ -35,6 +36,17 @@ type point struct {
 type Human = Person
 type Employee Person
 
+// Methods on aliases.
+func (h *Human) Age() int {
+	return h.age
+}
+func (aid AliasID) GetVal() int {
+	return int(aid)
+}
+func (aid *AliasID) GetPtr() int {
+	return int(*aid)
+}
+
 // Inner struct.
 type Benchmark struct {
 	name string
@@ -50,7 +62,7 @@ func main() {
 		var id ID = 123
 		_ = id
 
-		var aid AliasedID = 456
+		var aid AliasID = 456
 		_ = aid
 
 		var alsoID AlsoID = 789
@@ -148,6 +160,25 @@ func main() {
 		}
 		if (p1 == point{}) {
 			panic("p1 == point{}")
+		}
+	}
+	{
+		// Type aliases.
+		h := Human{name: "Alice", age: 30}
+		age := h.Age()
+		if age != 30 {
+			panic("h.Age() != 30")
+		}
+		aid := AliasID(123)
+		if aid.GetVal() != 123 {
+			panic("aid.GetVal() != 123")
+		}
+		if aid.GetPtr() != 123 {
+			panic("aid.GetPtr() != 123")
+		}
+		var id ID = aid
+		if id.GetVal() != 123 {
+			panic("id.GetVal() != 123")
 		}
 	}
 }
