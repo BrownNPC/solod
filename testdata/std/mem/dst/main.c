@@ -179,22 +179,45 @@ static void arenaTest(void) {
         if (p->x != 11 || p->y != 22) {
             so_panic("unexpected p.x or p.y");
         }
-        // Free is a no-op.
+        // Free last allocation reclaims space.
         mem_Free(main_Point, (a), (p));
-        // Reset and reallocate.
-        mem_Arena_Reset(&arena);
+        // Allocate again: should reuse the same space.
         so_R_ptr_err _res2 = mem_TryAlloc(main_Point, (a));
         main_Point* p2 = _res2.val;
         err = _res2.err;
         if (err.self != NULL) {
-            so_panic("allocation after reset failed");
+            so_panic("allocation after free failed");
         }
         // Memory should be zeroed.
         if (p2->x != 0 || p2->y != 0) {
-            so_panic("memory not zeroed after reset");
+            so_panic("memory not zeroed after free");
         }
         p2->x = 33;
         p2->y = 44;
+        // Free non-last allocation is a no-op.
+        so_R_ptr_err _res3 = mem_TryAlloc(main_Point, (a));
+        main_Point* p3 = _res3.val;
+        err = _res3.err;
+        if (err.self != NULL) {
+            so_panic("allocation for p3 failed");
+        }
+        p3->x = 55;
+        p3->y = 66;
+        // not last, no-op
+        mem_Free(main_Point, (a), (p2));
+        // Reset and reallocate.
+        mem_Arena_Reset(&arena);
+        so_R_ptr_err _res4 = mem_TryAlloc(main_Point, (a));
+        main_Point* p4 = _res4.val;
+        err = _res4.err;
+        if (err.self != NULL) {
+            so_panic("allocation after reset failed");
+        }
+        if (p4->x != 0 || p4->y != 0) {
+            so_panic("memory not zeroed after reset");
+        }
+        p4->x = 77;
+        p4->y = 88;
     }
 }
 

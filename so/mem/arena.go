@@ -1,7 +1,8 @@
 package mem
 
 // Arena is a memory allocator that bump-allocates linearly
-// within a fixed buffer. Individual Free calls are no-ops.
+// within a fixed buffer. Free reclaims the last allocation
+// if the pointer matches; otherwise it is a no-op.
 // Use Reset to reclaim all memory at once.
 type Arena struct {
 	buf       []byte
@@ -64,10 +65,11 @@ func (a *Arena) Realloc(ptr any, oldSize int, newSize int, align int) (any, erro
 }
 
 func (a *Arena) Free(ptr any, size int, align int) {
-	_ = a
-	_ = ptr
-	_ = size
 	_ = align
+	// Last allocation: reclaim the space.
+	if ptr == &a.buf[a.lastStart] && a.lastStart+size == a.offset {
+		a.offset = a.lastStart
+	}
 }
 
 // Reset reclaims all allocated memory, allowing the arena to be reused.
