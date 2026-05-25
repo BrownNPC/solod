@@ -9,6 +9,9 @@ import (
 // If the allocator is nil, uses the system allocator.
 // Returns an updated allocated slice; the caller owns it.
 //
+// Only use Append to append individual elements.
+// For appending another slice, use [Extend] instead.
+//
 //so:extern
 func Append[T any](a mem.Allocator, s []T, elems ...T) []T {
 	return append(s, elems...)

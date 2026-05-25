@@ -322,6 +322,13 @@ func (g *Generator) emitCallExpr(w io.Writer, n *ast.CallExpr) {
 // emitGenericCall emits a generic function call as fn(T, a, b),
 // where type arguments are prepended to the regular arguments.
 func (g *Generator) emitGenericCall(w io.Writer, n *ast.CallExpr, fun ast.Expr, inst types.Instance) {
+	if n.Ellipsis.IsValid() {
+		if ident := exprIdent(fun); ident != nil {
+			if ext, ok := g.getExtern(g.types.Uses[ident]); ok && !ext.nodecay {
+				g.fail(n, "spreading variadic arguments to an extern function is not supported")
+			}
+		}
+	}
 	g.emitExpr(w, fun)
 	fmt.Fprintf(w, "(%s", g.mapType(n, inst.TypeArgs.At(0)))
 	for i := 1; i < inst.TypeArgs.Len(); i++ {
