@@ -647,6 +647,10 @@ func (g *Generator) walkStmts(w io.Writer, stmts []ast.Stmt) {
 				fmt.Fprintf(w, "%s%s\n", g.indent(), strings.TrimSpace(c.Text))
 			}
 		}
+		if g.opts.TrackSource && !g.state.inMacro {
+			pos := g.pkg.Fset.Position(stmt.Pos())
+			fmt.Fprintf(w, "#line %d \"%s\"\n", pos.Line, pos.Filename)
+		}
 		g.walkAST(w, stmt)
 	}
 }

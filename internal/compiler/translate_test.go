@@ -35,7 +35,7 @@ func testPackage(t *testing.T, testDir string) {
 	be.Err(t, err, nil)
 	defer os.RemoveAll(tempOut)
 
-	err = Translate(srcDir, tempOut)
+	err = Translate(srcDir, tempOut, Options{})
 	be.Err(t, err, nil)
 
 	// Compare output with expected (recursively)
@@ -84,6 +84,37 @@ func assertFile(t *testing.T, dir, path, tempOut string, d fs.DirEntry, err erro
 		t.Errorf("%s:\ngot:\n%s\nwant:\n%s", relPath, got, want)
 	}
 	return nil
+}
+
+func TestTrackSource(t *testing.T) {
+	srcDir := "../../testdata/lang/panic/src"
+	tempOut, err := os.MkdirTemp("", "so_tracksource")
+	be.Err(t, err, nil)
+	defer os.RemoveAll(tempOut)
+
+	err = Translate(srcDir, tempOut, Options{TrackSource: true})
+	be.Err(t, err, nil)
+
+	content, err := os.ReadFile(filepath.Join(tempOut, "main.c"))
+	be.Err(t, err, nil)
+
+	// Verify #line directives: format "#line N "filename""
+	found := false
+	for line := range strings.SplitSeq(string(content), "\n") {
+		if strings.HasPrefix(line, "#line ") {
+			found = true
+			parts := strings.SplitN(line, " ", 3)
+			if len(parts) != 3 {
+				t.Errorf("malformed #line directive: %s", line)
+			}
+			if !strings.HasSuffix(parts[2], `main.go"`) {
+				t.Errorf("expected #line to reference main.go: %s", line)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("no #line directives found")
+	}
 }
 
 func isDir(path string) bool {

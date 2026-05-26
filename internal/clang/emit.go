@@ -14,8 +14,9 @@ import (
 
 // EmitOptions holds the options for code generation.
 type EmitOptions struct {
-	Pkg    *packages.Package
-	OutDir string
+	Pkg         *packages.Package
+	OutDir      string
+	TrackSource bool // track source locations for panics
 }
 
 // Emit generates C code for the given Go package and all its subpackages,
@@ -28,7 +29,7 @@ func Emit(opts EmitOptions) error {
 	}
 
 	// Initialize the generator with package information.
-	g := newGenerator(opts.Pkg)
+	g := newGenerator(opts)
 	g.collect()
 
 	// Emit header file.
@@ -77,6 +78,7 @@ type Includes struct {
 
 // Generator is responsible for generating C code from Go ASTs.
 type Generator struct {
+	opts        EmitOptions
 	pkg         *packages.Package
 	types       *types.Info
 	state       State
@@ -92,10 +94,11 @@ type Generator struct {
 }
 
 // newGenerator creates a new Generator instance.
-func newGenerator(pkg *packages.Package) *Generator {
+func newGenerator(opts EmitOptions) *Generator {
 	return &Generator{
-		pkg:      pkg,
-		types:    pkg.TypesInfo,
+		opts:     opts,
+		pkg:      opts.Pkg,
+		types:    opts.Pkg.TypesInfo,
 		externs:  make(map[types.Object]externInfo),
 		funcDirs: make(map[*ast.FuncDecl]directives),
 	}

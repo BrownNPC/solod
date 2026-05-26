@@ -63,6 +63,7 @@ Run 'so <command> -h' for details.
 func translate(args []string) error {
 	flags := flag.NewFlagSet("translate", flag.ContinueOnError)
 	outDir := flags.String("o", "", "output directory (default: current directory)")
+	trackSource := flags.Bool("track-source", false, "track source locations for panics")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -77,12 +78,16 @@ func translate(args []string) error {
 		out = "."
 	}
 
-	return compiler.Translate(pkg, out)
+	opts := compiler.Options{
+		TrackSource: *trackSource,
+	}
+	return compiler.Translate(pkg, out, opts)
 }
 
 func build(args []string) error {
 	flags := flag.NewFlagSet("build", flag.ContinueOnError)
 	outFile := flags.String("o", "", "output file (default: basename of package directory)")
+	trackSource := flags.Bool("track-source", false, "track source locations for panics")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -101,11 +106,15 @@ func build(args []string) error {
 		out = filepath.Base(absDir)
 	}
 
-	return compiler.Build(pkg, out)
+	opts := compiler.Options{
+		TrackSource: *trackSource,
+	}
+	return compiler.Build(pkg, out, opts)
 }
 
 func run(args []string) error {
 	flags := flag.NewFlagSet("run", flag.ContinueOnError)
+	trackSource := flags.Bool("track-source", false, "track source locations for panics")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -117,5 +126,8 @@ func run(args []string) error {
 		runArgs = flags.Args()[1:]
 	}
 
-	return compiler.Run(pkg, runArgs)
+	opts := compiler.Options{
+		TrackSource: *trackSource,
+	}
+	return compiler.Run(pkg, runArgs, opts)
 }

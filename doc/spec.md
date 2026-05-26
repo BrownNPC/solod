@@ -906,6 +906,15 @@ panic(err)
 
 In C, this is emitted as a macro call `so_panic(...)`.
 
+By default, panic messages report the C file and line number. Use the `--track-source` flag to print the original So source locations instead:
+
+```
+so build --track-source .
+so run --track-source .
+```
+
+When `--track-source` is enabled, the reported source location may be off by a few lines for panics that occur inside complex statements (e.g., multi-line expressions or nested calls).
+
 `recover` is not supported.
 
 ## Defer

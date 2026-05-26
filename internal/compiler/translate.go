@@ -11,9 +11,14 @@ import (
 	"solod.dev/internal/clang"
 )
 
+// Options holds the options for the compiler pipeline.
+type Options struct {
+	TrackSource bool // track source locations for panics
+}
+
 // Translate loads all Go packages from srcDir (including So stdlib dependencies),
 // translates them to C, and writes the output to outDir.
-func Translate(srcDir string, outDir string) error {
+func Translate(srcDir, outDir string, opts Options) error {
 	pkgs, err := loadPackages(srcDir)
 	if err != nil {
 		return err
@@ -30,8 +35,9 @@ func Translate(srcDir string, outDir string) error {
 	for _, pkg := range ordered {
 		pkgOutDir := packageOutDir(pkg, entry, outDir)
 		if err := clang.Emit(clang.EmitOptions{
-			Pkg:    pkg,
-			OutDir: pkgOutDir,
+			Pkg:         pkg,
+			OutDir:      pkgOutDir,
+			TrackSource: opts.TrackSource,
 		}); err != nil {
 			return err
 		}
