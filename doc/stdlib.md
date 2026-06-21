@@ -282,13 +282,14 @@ Types:
 
 ## [so/net](https://pkg.go.dev/solod.dev/so/net)
 
-Basic TCP and UDP networking. There is no Unix socket or concurrent server support.
+Basic TCP, UDP, and Unix domain socket networking. There is no concurrent server support.
 
 Functions:
 
-- `ResolveTCPAddr` resolves a `host:port` string to a `TCPAddr`; `ResolveUDPAddr` does the same for a `UDPAddr`.
+- `ResolveTCPAddr` resolves a `host:port` string to a `TCPAddr`; `ResolveUDPAddr` does the same for a `UDPAddr`; `ResolveUnixAddr` carries a socket path into a `UnixAddr`.
 - `DialTCP` connects to a TCP address; `ListenTCP` announces on a local one.
 - `DialUDP` creates a connected UDP socket (fixed peer, `Read`/`Write`); `ListenUDP` creates an unconnected one (any peer, `ReadFrom`/`WriteTo`).
+- `DialUnix` connects to a Unix socket; `ListenUnix` announces a stream listener; `ListenUnixgram` binds an unconnected datagram socket.
 - `SplitHostPort` splits a `host:port` address into a `HostPort`; `JoinHostPort` does the reverse into a caller buffer.
 
 Types:
@@ -298,6 +299,9 @@ Types:
 - `TCPListener` is a TCP listener; its `Accept` method returns the next `TCPConn`.
 - `UDPAddr` is the address of a UDP endpoint.
 - `UDPConn` is a UDP socket; connected (`Read`/`Write`) or unconnected (`ReadFrom`/`WriteTo`).
+- `UnixAddr` is the path of a Unix domain socket endpoint.
+- `UnixConn` is a Unix socket; a connected stream/datagram (`Read`/`Write`) or an unconnected datagram (`ReadFrom`/`WriteTo`).
+- `UnixListener` is a Unix stream listener; its `Accept` method returns the next `UnixConn`.
 
 ## [so/net/netip](https://pkg.go.dev/solod.dev/so/net/netip)
 

@@ -24,15 +24,36 @@ static void testUDP_Dial(void);
 static void testUDP_ReadFromWriteTo(void);
 static void testUDP_ReadDeadline(void);
 static void testUDP_CloseErrors(void);
+static void testUnix(void);
+static void testUnix_Resolve(void);
+static void testUnix_StreamDial(void);
+static void testUnix_StreamReadEOF(void);
+static void testUnix_DialRefused(void);
+static void testUnix_Datagram(void);
+static void testUnix_ReadDeadline(void);
+static void testUnix_CloseErrors(void);
+static void testUnix_UnlinkOnClose(void);
+static so_String unixPath(so_Slice buf, so_String name);
+
+// -- Variables and constants --
+
+// unixDir is a temporary directory holding the test socket files.
+static so_String unixDir = so_str("");
+
+// unixDirBuf backs unixDir; the path is a view into it.
+static so_byte unixDirBuf[256] = {0};
 
 // -- main.go --
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    so_String _so_argv[argc];
+    so_args_init(argc, argv, _so_argv);
     so_println("%s", "solod.dev/so/net");
     testSplitHostPort();
     testJoinHostPort();
     testTCP();
     testUDP();
+    testUnix();
     return 0;
 }
 
@@ -715,4 +736,339 @@ static void testUDP_CloseErrors(void) {
         }
     }
     so_println("%s", "ok");
+}
+
+// -- unix.go --
+
+static void testUnix(void) {
+    so_R_str_err _res1 = os_MkdirTemp(so_array_slice(so_byte, unixDirBuf, 0, 256, 256), so_str(""), so_str("so-net-unix"));
+    so_String dir = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    unixDir = dir;
+    testUnix_Resolve();
+    testUnix_StreamDial();
+    testUnix_StreamReadEOF();
+    testUnix_DialRefused();
+    testUnix_Datagram();
+    testUnix_ReadDeadline();
+    testUnix_CloseErrors();
+    testUnix_UnlinkOnClose();
+    noError(os_Remove(unixDir));
+}
+
+static void testUnix_Resolve(void) {
+    so_print("%s", "- Unix resolve...");
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unix"), so_str("/tmp/echo.sock"));
+    net_UnixAddr addr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    if (so_string_ne(addr.Name, so_str("/tmp/echo.sock")) || so_string_ne(addr.Net, so_str("unix"))) {
+        so_panic("unexpected ResolveUnixAddr result");
+    }
+    if (so_string_ne(net_UnixAddr_Network(addr), so_str("unix")) || so_string_ne(net_UnixAddr_String(addr), so_str("/tmp/echo.sock"))) {
+        so_panic("unexpected UnixAddr Network/String");
+    }
+    net_UnixAddrResult _res2 = net_ResolveUnixAddr(so_str("unixgram"), so_str("/tmp/dg.sock"));
+    net_UnixAddr gram = _res2.val;
+    err = _res2.err;
+    noError(err);
+    if (so_string_ne(gram.Net, so_str("unixgram")) || so_string_ne(net_UnixAddr_Network(gram), so_str("unixgram"))) {
+        so_panic("unexpected unixgram network");
+    }
+    // unixpacket is intentionally unsupported, as is any other network.
+    {
+        net_UnixAddrResult _res3 = net_ResolveUnixAddr(so_str("unixpacket"), so_str("/tmp/x.sock"));
+        so_Error err = _res3.err;
+        if (err.self != net_ErrUnknownNetwork.self) {
+            so_panic("unixpacket should be unknown");
+        }
+    }
+    {
+        net_UnixAddrResult _res4 = net_ResolveUnixAddr(so_str("bogus"), so_str("/tmp/x.sock"));
+        so_Error err = _res4.err;
+        if (err.self != net_ErrUnknownNetwork.self) {
+            so_panic("bogus network should be unknown");
+        }
+    }
+    so_println("%s", "ok");
+}
+
+static void testUnix_StreamDial(void) {
+    so_print("%s", "- Unix stream dial...");
+    // A single-threaded loopback echo: the connect queues into the listener
+    // backlog, so Accept does not block on another thread.
+    so_byte pathBuf[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unix"), unixPath(so_array_slice(so_byte, pathBuf, 0, 320, 320), so_str("stream.sock")));
+    net_UnixAddr laddr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    net_UnixListenerResult _res2 = net_ListenUnix(so_str("unix"), &laddr);
+    net_UnixListener ln = _res2.val;
+    err = _res2.err;
+    noError(err);
+    if (so_string_ne(net_UnixListener_Addr(&ln).Name, laddr.Name)) {
+        so_panic("listener addr mismatch");
+    }
+    net_UnixAddr raddr = net_UnixListener_Addr(&ln);
+    net_UnixConnResult _res3 = net_DialUnix(so_str("unix"), NULL, &raddr);
+    net_UnixConn client = _res3.val;
+    err = _res3.err;
+    noError(err);
+    if (so_string_ne(net_UnixConn_RemoteAddr(&client).Name, raddr.Name)) {
+        so_panic("client remote addr mismatch");
+    }
+    net_UnixConnResult _res4 = net_UnixListener_Accept(&ln);
+    net_UnixConn server = _res4.val;
+    err = _res4.err;
+    noError(err);
+    if (so_string_ne(net_UnixConn_LocalAddr(&server).Name, raddr.Name)) {
+        so_panic("accepted local addr mismatch");
+    }
+    // Client writes, server echoes, client reads it back.
+    {
+        so_R_int_err _res5 = net_UnixConn_Write(&client, so_string_bytes(so_str("ping")));
+        so_Error err = _res5.err;
+        if (err.self != NULL) {
+            so_panic(so_error_cstr(err));
+        }
+    }
+    so_byte buf[256] = {0};
+    so_R_int_err _res6 = net_UnixConn_Read(&server, so_array_slice(so_byte, buf, 0, 256, 256));
+    so_int n = _res6.val;
+    err = _res6.err;
+    noError(err);
+    {
+        so_R_int_err _res7 = net_UnixConn_Write(&server, so_array_slice(so_byte, buf, 0, n, 256));
+        so_Error err = _res7.err;
+        if (err.self != NULL) {
+            so_panic(so_error_cstr(err));
+        }
+    }
+    so_byte got[256] = {0};
+    so_R_int_err _res8 = net_UnixConn_Read(&client, so_array_slice(so_byte, got, 0, 256, 256));
+    n = _res8.val;
+    err = _res8.err;
+    noError(err);
+    if (so_string_ne(so_bytes_string(so_array_slice(so_byte, got, 0, n, 256)), so_str("ping"))) {
+        so_panic("echo mismatch");
+    }
+    net_UnixConn_Close(&client);
+    net_UnixConn_Close(&server);
+    noError(net_UnixListener_Close(&ln));
+    so_println("%s", "ok");
+}
+
+static void testUnix_StreamReadEOF(void) {
+    so_print("%s", "- Unix stream read EOF...");
+    // Connect a pair, then close the server end; the client's next read must
+    // report end of stream.
+    so_byte pathBuf[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unix"), unixPath(so_array_slice(so_byte, pathBuf, 0, 320, 320), so_str("eof.sock")));
+    net_UnixAddr laddr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    net_UnixListenerResult _res2 = net_ListenUnix(so_str("unix"), &laddr);
+    net_UnixListener ln = _res2.val;
+    err = _res2.err;
+    noError(err);
+    net_UnixAddr raddr = net_UnixListener_Addr(&ln);
+    net_UnixConnResult _res3 = net_DialUnix(so_str("unix"), NULL, &raddr);
+    net_UnixConn client = _res3.val;
+    err = _res3.err;
+    noError(err);
+    net_UnixConnResult _res4 = net_UnixListener_Accept(&ln);
+    net_UnixConn server = _res4.val;
+    err = _res4.err;
+    noError(err);
+    noError(net_UnixConn_Close(&server));
+    so_byte buf[16] = {0};
+    {
+        so_R_int_err _res5 = net_UnixConn_Read(&client, so_array_slice(so_byte, buf, 0, 16, 16));
+        so_Error err = _res5.err;
+        if (err.self != io_EOF.self) {
+            so_panic("expected EOF");
+        }
+    }
+    net_UnixConn_Close(&client);
+    noError(net_UnixListener_Close(&ln));
+    so_println("%s", "ok");
+}
+
+static void testUnix_DialRefused(void) {
+    so_print("%s", "- Unix dial refused...");
+    // Dialing a path with no socket file (nothing listening) must fail.
+    so_byte pathBuf[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unix"), unixPath(so_array_slice(so_byte, pathBuf, 0, 320, 320), so_str("refused.sock")));
+    net_UnixAddr addr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    {
+        net_UnixConnResult _res2 = net_DialUnix(so_str("unix"), NULL, &addr);
+        so_Error err = _res2.err;
+        if (err.self == NULL) {
+            so_panic("expected dial to a missing socket to fail");
+        }
+    }
+    so_println("%s", "ok");
+}
+
+static void testUnix_Datagram(void) {
+    so_print("%s", "- Unix datagram...");
+    // Two bound datagram sockets exchange messages in both directions, each
+    // receiver checking the reported source path against the sender's address.
+    so_byte pathBufA[320] = {0};
+    so_byte pathBufB[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unixgram"), unixPath(so_array_slice(so_byte, pathBufA, 0, 320, 320), so_str("dga.sock")));
+    net_UnixAddr addrA = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    net_UnixConnResult _res2 = net_ListenUnixgram(so_str("unixgram"), &addrA);
+    net_UnixConn a = _res2.val;
+    err = _res2.err;
+    noError(err);
+    net_UnixAddrResult _res3 = net_ResolveUnixAddr(so_str("unixgram"), unixPath(so_array_slice(so_byte, pathBufB, 0, 320, 320), so_str("dgb.sock")));
+    net_UnixAddr addrB = _res3.val;
+    err = _res3.err;
+    noError(err);
+    net_UnixConnResult _res4 = net_ListenUnixgram(so_str("unixgram"), &addrB);
+    net_UnixConn b = _res4.val;
+    err = _res4.err;
+    noError(err);
+    // A -> B.
+    net_UnixAddr bAddr = net_UnixConn_LocalAddr(&b);
+    {
+        so_R_int_err _res5 = net_UnixConn_WriteTo(&a, so_string_bytes(so_str("ping")), &bAddr);
+        so_Error err = _res5.err;
+        if (err.self != NULL) {
+            so_panic(so_error_cstr(err));
+        }
+    }
+    so_byte buf[256] = {0};
+    net_UnixReadResult _res6 = net_UnixConn_ReadFrom(&b, so_array_slice(so_byte, buf, 0, 256, 256));
+    net_UnixRead r = _res6.val;
+    err = _res6.err;
+    noError(err);
+    if (so_string_ne(so_bytes_string(so_array_slice(so_byte, buf, 0, r.N, 256)), so_str("ping"))) {
+        so_panic("A->B payload mismatch");
+    }
+    if (so_string_ne(r.Addr.Name, net_UnixConn_LocalAddr(&a).Name)) {
+        so_panic("A->B source addr mismatch");
+    }
+    // B -> A, replying to the learned source address.
+    {
+        so_R_int_err _res7 = net_UnixConn_WriteTo(&b, so_string_bytes(so_str("pong")), &r.Addr);
+        so_Error err = _res7.err;
+        if (err.self != NULL) {
+            so_panic(so_error_cstr(err));
+        }
+    }
+    so_byte buf2[256] = {0};
+    net_UnixReadResult _res8 = net_UnixConn_ReadFrom(&a, so_array_slice(so_byte, buf2, 0, 256, 256));
+    net_UnixRead r2 = _res8.val;
+    err = _res8.err;
+    noError(err);
+    if (so_string_ne(so_bytes_string(so_array_slice(so_byte, buf2, 0, r2.N, 256)), so_str("pong"))) {
+        so_panic("B->A payload mismatch");
+    }
+    if (so_string_ne(r2.Addr.Name, net_UnixConn_LocalAddr(&b).Name)) {
+        so_panic("B->A source addr mismatch");
+    }
+    noError(net_UnixConn_Close(&a));
+    noError(net_UnixConn_Close(&b));
+    so_println("%s", "ok");
+}
+
+static void testUnix_ReadDeadline(void) {
+    so_print("%s", "- Unix read deadline...");
+    // A ReadFrom with a short deadline and no data must time out.
+    so_byte pathBuf[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unixgram"), unixPath(so_array_slice(so_byte, pathBuf, 0, 320, 320), so_str("dl.sock")));
+    net_UnixAddr laddr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    net_UnixConnResult _res2 = net_ListenUnixgram(so_str("unixgram"), &laddr);
+    net_UnixConn conn = _res2.val;
+    err = _res2.err;
+    noError(err);
+    noError(net_UnixConn_SetReadDeadline(&conn, time_Time_Add(time_Now(), 50 * time_Millisecond)));
+    so_byte buf[16] = {0};
+    {
+        net_UnixReadResult _res3 = net_UnixConn_ReadFrom(&conn, so_array_slice(so_byte, buf, 0, 16, 16));
+        so_Error err = _res3.err;
+        if (err.self != net_ErrTimeout.self) {
+            so_panic("expected timeout");
+        }
+    }
+    noError(net_UnixConn_Close(&conn));
+    so_println("%s", "ok");
+}
+
+static void testUnix_CloseErrors(void) {
+    so_print("%s", "- Unix close errors...");
+    // A double close, and any I/O after close, must report ErrClosed.
+    so_byte pathBuf[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unixgram"), unixPath(so_array_slice(so_byte, pathBuf, 0, 320, 320), so_str("close.sock")));
+    net_UnixAddr laddr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    net_UnixConnResult _res2 = net_ListenUnixgram(so_str("unixgram"), &laddr);
+    net_UnixConn conn = _res2.val;
+    err = _res2.err;
+    noError(err);
+    noError(net_UnixConn_Close(&conn));
+    {
+        so_Error err = net_UnixConn_Close(&conn);
+        if (err.self != net_ErrClosed.self) {
+            so_panic("expected ErrClosed on double close");
+        }
+    }
+    so_byte buf[16] = {0};
+    {
+        net_UnixReadResult _res3 = net_UnixConn_ReadFrom(&conn, so_array_slice(so_byte, buf, 0, 16, 16));
+        so_Error err = _res3.err;
+        if (err.self != net_ErrClosed.self) {
+            so_panic("expected ErrClosed on ReadFrom after close");
+        }
+    }
+    {
+        so_R_int_err _res4 = net_UnixConn_WriteTo(&conn, so_array_slice(so_byte, buf, 0, 16, 16), &laddr);
+        so_Error err = _res4.err;
+        if (err.self != net_ErrClosed.self) {
+            so_panic("expected ErrClosed on WriteTo after close");
+        }
+    }
+    so_println("%s", "ok");
+}
+
+static void testUnix_UnlinkOnClose(void) {
+    so_print("%s", "- Unix unlink on close...");
+    // Listening creates the socket file; Close must remove it. After Close, the
+    // path is gone, so removing it again reports "not exist".
+    so_byte pathBuf[320] = {0};
+    net_UnixAddrResult _res1 = net_ResolveUnixAddr(so_str("unix"), unixPath(so_array_slice(so_byte, pathBuf, 0, 320, 320), so_str("unlink.sock")));
+    net_UnixAddr laddr = _res1.val;
+    so_Error err = _res1.err;
+    noError(err);
+    net_UnixListenerResult _res2 = net_ListenUnix(so_str("unix"), &laddr);
+    net_UnixListener ln = _res2.val;
+    err = _res2.err;
+    noError(err);
+    noError(net_UnixListener_Close(&ln));
+    {
+        so_Error err = os_Remove(laddr.Name);
+        if (err.self != os_ErrNotExist.self) {
+            so_panic("socket file should have been unlinked on Close");
+        }
+    }
+    so_println("%s", "ok");
+}
+
+// unixPath builds unixDir + "/" + name into buf and returns it.
+static so_String unixPath(so_Slice buf, so_String name) {
+    so_Slice b = so_slice(so_byte, buf, 0, 0);
+    b = so_extend(so_byte, b, so_string_bytes(unixDir));
+    b = so_append(so_byte, b, '/');
+    b = so_extend(so_byte, b, so_string_bytes(name));
+    return so_bytes_string(b);
 }

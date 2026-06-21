@@ -1,19 +1,26 @@
-// Package net provides basic TCP and UDP networking.
+// Package net provides basic TCP, UDP, and Unix domain socket networking.
 //
 // It is a small subset of Go's net package. TCP (networks "tcp", "tcp4",
-// "tcp6") and UDP (networks "udp", "udp4", "udp6") are supported; there is no
-// Unix socket or concurrent server support.
+// "tcp6"), UDP (networks "udp", "udp4", "udp6"), and Unix domain sockets
+// ("unix" for streams and "unixgram" for datagrams) are supported;
+// there is no concurrent server support.
 //
-// Most TCP clients will need only the basic interface provided by the
-// [ResolveTCPAddr], [DialTCP] and [ListenTCP] functions, and the associated
-// [TCPConn] and [TCPListener] types. UDP is served by [ResolveUDPAddr],
-// [DialUDP] (a connected socket, with [UDPConn.Read]/[UDPConn.Write]) and
-// [ListenUDP] (an unconnected socket, with [UDPConn.ReadFrom]/[UDPConn.WriteTo]).
+// TCP is served by [ResolveTCPAddr], [DialTCP] and [ListenTCP] functions,
+// and the associated [TCPConn] and [TCPListener] types.
+//
+// UDP is served by [ResolveUDPAddr], [DialUDP] (a connected socket, with
+// [UDPConn.Read]/[UDPConn.Write]) and [ListenUDP] (an unconnected socket,
+// with [UDPConn.ReadFrom]/[UDPConn.WriteTo]).
+//
+// Unix domain sockets are served by [ResolveUnixAddr], [DialUnix], [ListenUnix]
+// (stream), and [ListenUnixgram] (datagram), sharing the [UnixConn] type;
+// a [ListenUnix] or [ListenUnixgram] socket file is removed on Close.
 //
 // Accept, Read, and Write block by default. They can be bounded with
-// a deadline: [TCPConn.SetDeadline], [TCPListener.SetDeadline] and
-// [UDPConn.SetDeadline] make a pending call fail with ErrTimeout once the
-// deadline passes. Without a deadline, a blocked call waits indefinitely.
+// a deadline: [TCPConn.SetDeadline], [TCPListener.SetDeadline],
+// [UDPConn.SetDeadline], [UnixConn.SetDeadline] and [UnixListener.SetDeadline]
+// make a pending call fail with ErrTimeout once the deadline passes. Without a
+// deadline, a blocked call waits indefinitely.
 package net
 
 import (

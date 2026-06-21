@@ -59,3 +59,29 @@ func (stor *sockaddr_storage) fill(ap netip.AddrPort) c.UInt {
 	}
 	return 0
 }
+
+// maxUnixPath is the maximum length of a Unix socket path,
+// including the NUL terminator.
+const maxUnixPath = 104
+
+// fillUnix encodes name into stor as a sockaddr_un and returns its length, or 0
+// if name is empty or too long to fit (with its NUL) in sun_path. The length is
+// always the full sockaddr_un size, which is correct for pathname sockets.
+func (stor *sockaddr_storage) fillUnix(name string) c.UInt {
+	if len(name) == 0 || len(name) >= maxUnixPath {
+		return 0
+	}
+	mem.Clear(stor, c.Sizeof[sockaddr_storage]())
+	sun := c.PtrAs[sockaddr_un](stor)
+	sun.sun_family = c_AF_UNIX
+	mem.Copy(&sun.sun_path[0], c.CString(name), len(name)) // NUL already from Clear
+	return c.UInt(c.Sizeof[sockaddr_un]())
+}
+
+// unixName decodes the NUL-terminated path from a sockaddr_un in stor, as
+// filled in by recvfrom for a datagram's source. An unbound (anonymous) peer
+// has an empty path, which yields "". The returned string aliases stor.
+func (stor *sockaddr_storage) unixName() string {
+	sun := c.PtrAs[sockaddr_un](stor)
+	return c.String(c.PtrAs[c.Char](&sun.sun_path[0]))
+}

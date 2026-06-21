@@ -10,6 +10,7 @@ import "solod.dev/so/c"
 //so:include.c <poll.h>
 //so:include.c <signal.h>
 //so:include.c <sys/socket.h>
+//so:include.c <sys/un.h>
 //so:include.c <unistd.h>
 
 //so:embed net.h
@@ -54,6 +55,8 @@ const c_AF_UNSPEC = 0 // unspecified; let getaddrinfo choose
 const c_AF_INET = 0 // IPv4
 //so:extern AF_INET6
 const c_AF_INET6 = 0 // IPv6
+//so:extern AF_UNIX
+const c_AF_UNIX = 0 // Unix domain (local) sockets
 
 //so:extern SOCK_STREAM
 const c_SOCK_STREAM = 0 // sequenced, reliable, two-way byte stream (TCP)
@@ -116,6 +119,14 @@ type sockaddr_in6 struct {
 	sin6_family uint16   // = AF_INET6
 	sin6_port   uint16   // port number
 	sin6_addr   in6_addr // IPv6 address
+}
+
+// sockaddr_un is the sockaddr structure for Unix domain (local) addresses.
+//
+//so:extern struct sockaddr_un
+type sockaddr_un struct {
+	sun_family uint16    // = AF_UNIX
+	sun_path   [104]byte // filesystem path, NUL-terminated
 }
 
 // sockaddr_storage is a buffer big enough and suitably aligned for any [sockaddr].
@@ -310,6 +321,15 @@ func recvfrom(socket c.Int, buf *byte, length uintptr, flags c.Int, address *soc
 func fd_close(fd c.Int) c.Int {
 	_ = fd
 	return 0
+}
+
+// unlink removes a name from the filesystem.
+// Returns zero on success, or -1 on error.
+//
+//so:extern unlink
+func unlink(path string) c.Int {
+	_ = path
+	return -1
 }
 
 // fcntl performs an operation on the file descriptor fd. The C function is

@@ -8,6 +8,7 @@ func main() {
 	testJoinHostPort()
 	testTCP()
 	testUDP()
+	testUnix()
 }
 
 func testSplitHostPort() {
